@@ -19,52 +19,6 @@
 #include "SharedPtrTest.hpp"
 
 #if 0
-static void token(void)
-{
-	TEST_STEP(30, 1, "Token",
-			  "Should work") {
-		CParentPtr p;
-		CHECK_ID(p, CI_PARENT);
-
-		{
-			auto token = p.ToToken();
-			CHECK(2 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p1(token, true);
-			CHECK(3 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p2(token, true);
-			CHECK(4 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p3(token, true);
-			CHECK(5 == p.GetRef(), "ref: %d", p.GetRef());
-
-			token->Release();
-		}
-
-		CHECK(1 == p.GetRef(), "ref: %d", p.GetRef());
-
-		{
-			auto token = p.ToToken();
-			CHECK(2 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p1(token, true);
-			CHECK(3 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p2(token, true);
-			CHECK(4 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p3(token, true);
-			CHECK(5 == p.GetRef(), "ref: %d", p.GetRef());
-
-			CParentPtr p4(token);
-			CHECK(5 == p.GetRef(), "ref: %d", p.GetRef());
-		}
-
-		CHECK(1 == p.GetRef(), "ref: %d", p.GetRef());
-	}
-}
-
 static void operator_others(void)
 {
 	TEST_STEP(82, 1, "operator []",
@@ -278,8 +232,8 @@ TEST_CASE_ENTRY()
 	RUN_TEST(AddEqual);
 	RUN_TEST(SubEqual);
 	RUN_TEST(Compare);
+	RUN_TEST(Token);
 #if 0
-	DO_TEST(token);
 	DO_TEST(operator_others);
 	DO_TEST(others);
 	DO_TEST(reference);

@@ -88,6 +88,7 @@ void IsEqual(void);
 void AddEqual(void);
 void SubEqual(void);
 void Compare(void);
+void Token(void);
 
 #endif /* __SHARED_PTR_TEST_HPP__ */
 
