@@ -19,96 +19,6 @@
 #include "SharedPtrTest.hpp"
 
 #if 0
-static void operator_others(void)
-{
-	TEST_STEP(82, 1, "operator []",
-			  "CSharedPtr<this> == null") {
-		CConstParentPtr p(nullptr);
-		CHECK_THROW(p[10]);
-	}
-
-	TEST_STEP(82, 2, "operator []",
-			  "CSharedPtr<this> != null, non-const") {
-		CParentPtr p(1);
-		CHECK(11 == p[10], "p[10] = %d", p[10]);
-	}
-
-	TEST_STEP(82, 3, "operator []",
-			  "CSharedPtr<this> != null, const") {
-		CConstParentPtr p(1);
-		CHECK(10 == p[10], "p[10] = %d", p[10]);
-	}
-
-	TEST_STEP(83, 1, "operator void(...)",
-			  "CSharedPtr<this> == null") {
-		CParentPtr p(nullptr);
-		CHECK_THROW(p("test"));
-	}
-
-	TEST_STEP(83, 2, "operator void(...)",
-			  "CSharedPtr<this> != null, non-const") {
-		CParentPtr p(1);
-		p("test");
-		CHECK(5 == p->GetNum(), "num: %d", p->GetNum());
-	}
-
-	TEST_STEP(83, 3, "operator void(...)",
-			  "CSharedPtr<this> != null, const") {
-		CConstParentPtr p(1);
-		p("test");
-		CHECK(1 == p->GetNum(), "num: %d", p->GetNum());
-	}
-
-	TEST_STEP(84, 1, "operator non-void(...)",
-			  "CSharedPtr<this> == null") {
-		CParentPtr p(nullptr);
-		CHECK_THROW(p(10));
-	}
-
-	TEST_STEP(84, 2, "operator non-void(...)",
-			  "CSharedPtr<this> != null, non-const") {
-		CParentPtr p(1);
-		CHECK(11 == p(10), "p(10) = %d", p(10));
-	}
-
-	TEST_STEP(84, 3, "operator non-void(...)",
-			  "CSharedPtr<this> != null, const") {
-		CConstParentPtr p(1);
-		CHECK(10 == p(10), "p(10) = %d", p(10));
-	}
-
-	TEST_STEP(85, 1, "operator ->",
-			  "CSharedPtr<this> == null") {
-		CParentPtr p(nullptr);
-		CHECK_THROW(p->GetNum());
-	}
-
-	TEST_STEP(85, 2, "operator ->",
-			  "CSharedPtr<this> != null, non-const") {
-		CParentPtr p(1);
-		p->SetNum(10);
-		CHECK(10 == p->GetNum(), "num: %d", p->GetNum());
-	}
-
-	TEST_STEP(85, 3, "operator ->",
-			  "CSharedPtr<this> != null, const") {
-		CConstParentPtr p(1);
-		CHECK(1 == p->GetNum(), "num: %d", p->GetNum());
-	}
-
-	TEST_STEP(86, 1, "operator *",
-			  "CSharedPtr<this> == null") {
-		CParentPtr p(nullptr);
-		CHECK_THROW(*p);
-	}
-
-	TEST_STEP(86, 2, "operator *",
-			  "CSharedPtr<this> != null") {
-		CParentPtr p(1);
-		CHECK(1 == (*p).GetNum(), "num: %d", (*p).GetNum());
-	}
-}
-
 static void others(void)
 {
 	TEST_STEP(90, 1, "Release this shared pointer",
@@ -233,8 +143,8 @@ TEST_CASE_ENTRY()
 	RUN_TEST(SubEqual);
 	RUN_TEST(Compare);
 	RUN_TEST(Token);
+	RUN_TEST(OtherOperators);
 #if 0
-	DO_TEST(operator_others);
 	DO_TEST(others);
 	DO_TEST(reference);
 #endif

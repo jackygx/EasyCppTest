@@ -32,6 +32,14 @@ DEFINE_HELP_TYPE(DeriveIsEqual);
 DEFINE_HELP_TYPE(DeriveAddEqual);
 /* Used for SubEqual operator overload */
 DEFINE_HELP_TYPE(DeriveSubEqual);
+/* Used for Square Brackets operator overload */
+DEFINE_HELP_TYPE(DeriveSquareBrackets);
+/* Used for Function operator overload */
+DEFINE_HELP_TYPE(DeriveFunction1);
+DEFINE_HELP_TYPE(DeriveFunction2);
+DEFINE_HELP_TYPE(DeriveFunction3);
+/* Used for return of the Function operator overload */
+DEFINE_HELP_TYPE(DeriveReturn);
 
 /* Used for implicit conversion */
 DEFINE_CLASS(TypeDeriveImplicitConvert);
@@ -105,34 +113,25 @@ public:
 		mNum -= i.Get();
 	}
 
-	inline int operator [] (int i)
+	inline int operator [] (const CTypeDeriveSquareBracketsPtr &i) const
 	{
-		return i + mNum;
+		return mNum + i->Get();
 	}
 
-	inline int operator [] (int i) const
+	inline CTypeDeriveReturnPtr
+		operator () (const CTypeDeriveFunction1Ptr &i,
+					 CTypeDeriveFunction2Ptr &&j,
+					 const CTypeDeriveFunction3Ptr &k)
 	{
-		return i;
+		return CTypeDeriveReturnPtr(mNum + i->Get() + j->Get() + k->Get());
 	}
 
-	inline int operator () (int i)
+	inline CTypeDeriveReturnPtr
+		operator () (const CTypeDeriveFunction1Ptr &i,
+					 CTypeDeriveFunction2Ptr &&j,
+					 const CTypeDeriveFunction3Ptr &k) const
 	{
-		return i + mNum;
-	}
-
-	inline int operator () (int i) const
-	{
-		return i;
-	}
-
-	inline void operator () (const char *buf)
-	{
-		mNum += strlen(buf);
-	}
-
-	inline void operator () (const char *) const
-	{
-		/* Does nothing */
+		return CTypeDeriveReturnPtr(mNum - i->Get() - j->Get() - k->Get());
 	}
 
 	inline void SetNum(int i)

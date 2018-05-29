@@ -20,6 +20,7 @@ SRC := \
   SharedPtr/SharedPtrTestSubEqual.cpp \
   SharedPtr/SharedPtrTestCompare.cpp \
   SharedPtr/SharedPtrTestToken.cpp \
+  SharedPtr/SharedPtrTestOtherOperators.cpp \
   SharedPtr/SharedPtrTest.cpp
 
 include $(TEMPLATE)
