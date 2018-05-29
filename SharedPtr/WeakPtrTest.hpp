@@ -14,15 +14,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <EasyCpp.hpp>
-#include "EasyCppTest.hpp"
+#ifndef __WEAK_PTR_TEST_HPP__
+#define __WEAK_PTR_TEST_HPP__
 
-extern void SharedPtrTest(void);
-extern void WeakPtrTest(void);
+#include "SharedPtrTest.hpp"
 
-TEST_CASE_ENTRY()
-{
-	RUN_TEST(SharedPtrTest);
-	RUN_TEST(WeakPtrTest);
-}
+#define CHECK_WEAK_EMPTY(t) \
+	CHECK(!t.Lock(), "Lock: ", HEX(t.Lock().Get())); \
+	CHECK(0 == t.GetRef(), "Ref: ", DEC(t.GetRef())); \
+	CHECK(0 == t.GetWeakRef(), "WeakRef: ", DEC(t.GetWeakRef()));
+
+#define CHECK_WEAK(t, ref, wref) \
+	CHECK(t.Lock(), "Weak reference is empty"); \
+	CHECK(ref == t.GetRef(), "Ref: ", DEC(t.GetRef())); \
+	CHECK(wref == t.GetWeakRef(), "WeakRef: ", DEC(t.GetWeakRef()));
+
+#endif /* __WEAK_PTR_TEST_HPP__ */
 
