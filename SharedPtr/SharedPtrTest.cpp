@@ -19,25 +19,6 @@
 #include "SharedPtrTest.hpp"
 
 #if 0
-static void others(void)
-{
-	TEST_STEP(90, 1, "Release this shared pointer",
-			  "CSharedPtr<this> == null") {
-		CParentPtr p(nullptr);
-		CHECK(0 == p.GetRef(), "ref: %d", p.GetRef());
-		p.Release();
-		CHECK(0 == p.GetRef(), "ref: %d", p.GetRef());
-	}
-
-	TEST_STEP(90, 2, "Release this shared pointer",
-			  "CSharedPtr<this> != null") {
-		CParentPtr p;
-		CHECK(1 == p.GetRef(), "ref: %d", p.GetRef());
-		p.Release();
-		CHECK(0 == p.GetRef(), "ref: %d", p.GetRef());
-	}
-}
-
 static void reference(void)
 {
 	TEST_STEP(0, 0, "Reference",
@@ -144,8 +125,8 @@ TEST_CASE_ENTRY()
 	RUN_TEST(Compare);
 	RUN_TEST(Token);
 	RUN_TEST(OtherOperators);
+	RUN_TEST(Others);
 #if 0
-	DO_TEST(others);
 	DO_TEST(reference);
 #endif
 }

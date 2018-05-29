@@ -90,6 +90,7 @@ void SubEqual(void);
 void Compare(void);
 void Token(void);
 void OtherOperators(void);
+void Others(void);
 
 #endif /* __SHARED_PTR_TEST_HPP__ */
 
