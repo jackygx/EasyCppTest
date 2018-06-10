@@ -21,23 +21,19 @@
 
 DEFINE_TEST_GROUP(Token)
 {
-	TEST_CASE("Create from nullptr token will throw error") {
-		CHECK_THROW(CBaseAPtr base((CBaseAToken *)nullptr));
-	}
-
 	TEST_CASE("Copy create from token") {
 		CBaseAPtr base;
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 
-		auto token = base.ToToken();
+		CBaseAPtr *token = (CBaseAPtr *)base.ToToken();
 		CHECK_BASEA(base, CI_BASEA, 2, 1);
 
-		CBaseAPtr base1(token, TokenOps::COPY);
+		CBaseAPtr base1(*token);
 		CHECK_BASEA(base, CI_BASEA, 3, 1);
 		CHECK_BASEA(base1, CI_BASEA, 3, 1);
 		CHECK_SAME_PTR(base, base1);
 
-		CBaseAPtr base2(token, TokenOps::COPY);
+		CBaseAPtr base2(*token);
 		CHECK_BASEA(base, CI_BASEA, 4, 1);
 		CHECK_BASEA(base1, CI_BASEA, 4, 1);
 		CHECK_BASEA(base2, CI_BASEA, 4, 1);
@@ -58,16 +54,19 @@ DEFINE_TEST_GROUP(Token)
 		CBaseAPtr base;
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 
-		auto token = base.ToToken();
+		CBaseAPtr *token = (CBaseAPtr *)base.ToToken();
 		CHECK_BASEA(base, CI_BASEA, 2, 1);
 
-		CBaseAPtr base1(token, TokenOps::MOVE);
+		CBaseAPtr base1(std::move(*token));
 		CHECK_BASEA(base, CI_BASEA, 2, 1);
 		CHECK_BASEA(base1, CI_BASEA, 2, 1);
 		CHECK_SAME_PTR(base, base1);
 
-		CHECK_THROW(CBaseAPtr base2(token, TokenOps::COPY));
-		CHECK_THROW(CBaseAPtr base3(token, TokenOps::MOVE));
+		CBaseAPtr base2(std::move(*token));
+		CHECK_EMPTY(base2);
+
+		CBaseAPtr base3(*token);
+		CHECK_EMPTY(base3);
 
 		token->Release();
 		token = nullptr;

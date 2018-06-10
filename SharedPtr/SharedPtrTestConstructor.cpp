@@ -77,7 +77,16 @@ DEFINE_TEST_GROUP(PointerConstructor)
 {
 	TEST_CASE("Should throw error if input is nullptr") {
 		CBaseA *base1 = nullptr;
-		CHECK_THROW(CBaseAPtr base2(base1));
+		CBaseAPtr base2(base1);
+		CConstBaseAPtr base3(base1);
+		CHECK_EMPTY(base2);
+		CHECK_EMPTY(base3);
+	}
+
+	TEST_CASE("Test nullptr to CConstBaseAPtr (const)") {
+		const CBaseA *base1 = nullptr;
+		CConstBaseAPtr base2(base1);
+		CHECK_EMPTY(base2);
 	}
 
 	TEST_CASE("Should succeed from same type (non-const to non-const)") {
@@ -195,14 +204,10 @@ DEFINE_TEST_GROUP(PointerConstructor)
 	}
 }
 
-DEFINE_TEST_GROUP(SharedBaseConstructor)
+DEFINE_TEST_GROUP(MakeShared)
 {
-	TEST_CASE("Should throw error if input is nullptr") {
-		CHECK_THROW(CBaseAPtr base((CSharedBase<CBaseA> *)(nullptr)));
-	}
-
-	TEST_CASE("Should work if input is NOT nullptr") {
-		CBaseAPtr base(AllocCreateSharedBase<CBaseA>());
+	TEST_CASE("Should work") {
+		CBaseAPtr base(MakeShared<CBaseA>());
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 	}
 }
@@ -468,7 +473,7 @@ void Constructor(void)
 	RUN_TEST_GROUP(CopyConstructor);
 	RUN_TEST_GROUP(MoveConstructor);
 	RUN_TEST_GROUP(PointerConstructor);
-	RUN_TEST_GROUP(SharedBaseConstructor);
+	RUN_TEST_GROUP(MakeShared);
 	RUN_TEST_GROUP(SharedPtrLrefConstructor);
 	RUN_TEST_GROUP(SharedPtrRrefConstructor);
 	RUN_TEST_GROUP(SharedPtrMixConstructor);
