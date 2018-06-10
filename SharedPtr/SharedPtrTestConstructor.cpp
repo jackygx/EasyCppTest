@@ -21,61 +21,314 @@
 
 DEFINE_TEST_GROUP(DefaultConstructor)
 {
-	TEST_CASE("Should call default constructor for the class") {
+	TEST_CASE("Test IBaseCPtr") {
+		IBaseCPtr base;
+		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test IConstBaseCPtr") {
+		IConstBaseCPtr base;
+		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test CBaseAPtr(non-const)") {
 		CBaseAPtr base;
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 	}
 
-	TEST_CASE("Should be nullptr for the interface") {
-		IBaseCPtr base;
-		CHECK_EMPTY(base);
+	TEST_CASE("Test CBaseBPtr(non-const)") {
+		CBaseBPtr base;
+		CHECK_BASEB(base, CI_BASEB, 1, 3);
+	}
+
+	TEST_CASE("Test CDerivePtr(non-const)") {
+		CDerivePtr derive;
+		CHECK_DERIVE(derive, 1, 3);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr(const)") {
+		CConstBaseAPtr base;
+		CHECK_BASEA(base, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr(const)") {
+		CConstBaseBPtr base;
+		CHECK_BASEB(base, CI_BASEB, 1, 2);
+	}
+
+	TEST_CASE("Test CConstDerivePtr(const)") {
+		CConstDerivePtr derive;
+		CHECK_DERIVE(derive, 1, 2);
 	}
 }
 
 DEFINE_TEST_GROUP(NullConstructor)
 {
-	TEST_CASE("Should be nullptr") {
+	TEST_CASE("Test CBaseAPtr(non-const)") {
 		CBaseAPtr base(nullptr);
 		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test CBaseBPtr(non-const)") {
+		CBaseBPtr base(nullptr);
+		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test CDerivePtr(non-const)") {
+		CDerivePtr derive(nullptr);
+		CHECK_EMPTY(derive);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr(const)") {
+		CConstBaseAPtr base(nullptr);
+		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr(const)") {
+		CConstBaseBPtr base(nullptr);
+		CHECK_EMPTY(base);
+	}
+
+	TEST_CASE("Test CConstDerivePtr(const)") {
+		CConstDerivePtr derive(nullptr);
+		CHECK_EMPTY(derive);
 	}
 }
 
 DEFINE_TEST_GROUP(CopyConstructor)
 {
-	TEST_CASE("Shold be nullptr if input is nullptr") {
+	TEST_CASE("Test CBaseAPtr(nullptr) to CBaseAPtr/CConstBaseAPtr") {
 		CBaseAPtr base1(nullptr);
 		CBaseAPtr base2(base1);
+		CConstBaseAPtr base3(base1);
+		CHECK_EMPTY(base2);
+		CHECK_EMPTY(base3);
+	}
+
+	TEST_CASE("Test CBaseBPtr(nullptr) to CBaseBPtr/CConstBaseBPtr") {
+		CBaseBPtr base1(nullptr);
+		CBaseBPtr base2(base1);
+		CConstBaseBPtr base3(base1);
+		CHECK_EMPTY(base2);
+		CHECK_EMPTY(base3);
+	}
+
+	TEST_CASE("Test CDerivePtr(nullptr) to CDerivePtr/CConstDerivePtr") {
+		CDerivePtr derive1(nullptr);
+		CDerivePtr derive2(derive1);
+		CConstDerivePtr derive3(derive1);
+		CHECK_EMPTY(derive2);
+		CHECK_EMPTY(derive3);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr(nullptr) to CConstBaseAPtr") {
+		CConstBaseAPtr base1(nullptr);
+		CConstBaseAPtr basea2(base1);
+		CHECK_EMPTY(basea2);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr(nullptr) to CConstBaseBPtr") {
+		CConstBaseBPtr base1(nullptr);
+		CConstBaseBPtr base2(base1);
 		CHECK_EMPTY(base2);
 	}
 
-	TEST_CASE("Shold increase Ref if input is not nullptr") {
+	TEST_CASE("Test CConstDerivePtr(nullptr) to CConstDerivePtr") {
+		CConstDerivePtr derive1(nullptr);
+		CConstDerivePtr derive2(derive1);
+		CHECK_EMPTY(derive2);
+	}
+
+	TEST_CASE("Test CBaseAPtr to CBaseAPtr (non-const to non-const)") {
 		CBaseAPtr base1;
-		CBaseAPtr base2(base1);
+		CBaseAPtr basea2(base1);
+		CHECK_BASEA(base1, CI_BASEA, 2, 1);
+		CHECK_BASEA(basea2, CI_BASEA, 2, 1);
+		CHECK_SAME_PTR(base1.Get(), basea2.Get());
+	}
+
+	TEST_CASE("Test CBaseBPtr to CBaseBPtr (non-const to non-const)") {
+		CBaseBPtr base1;
+		CBaseBPtr base2(base1);
+		CHECK_BASEB(base1, CI_BASEB, 2, 3);
+		CHECK_BASEB(base2, CI_BASEB, 2, 3);
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CDerivePtr to CDerivePtr (non-const to non-const)") {
+		CDerivePtr derive1;
+		CDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive1, 2, 3);
+		CHECK_DERIVE(derive2, 2, 3);
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+	}
+
+	TEST_CASE("Test CConstBaseAPtr to CConstBaseAPtr (const to const)") {
+		CConstBaseAPtr base1;
+		CConstBaseAPtr base2(base1);
 		CHECK_BASEA(base1, CI_BASEA, 2, 1);
 		CHECK_BASEA(base2, CI_BASEA, 2, 1);
-		CHECK_SAME_PTR(base1, base2);
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
 	}
+
+	TEST_CASE("Test CConstBaseBPtr to CConstBaseBPtr (const to const)") {
+		CConstBaseBPtr base1;
+		CConstBaseBPtr base2(base1);
+		CHECK_BASEB(base1, CI_BASEB, 2, 2);
+		CHECK_BASEB(base2, CI_BASEB, 2, 2);
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CConstDerivePtr to CConstDerivePtr (const to const)") {
+		CConstDerivePtr derive1;
+		CConstDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive1, 2, 2);
+		CHECK_DERIVE(derive2, 2, 2);
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+	}
+
+	TEST_CASE("Test CBaseAPtr to CConstBaseAPtr (non-const to const)") {
+		CBaseAPtr base1;
+		CConstBaseAPtr base2(base1);
+		CHECK_BASEA(base1, CI_BASEA, 2, 1);
+		CHECK_BASEA(base2, CI_BASEA, 2, 1);
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CBaseBPtr to CConstBaseBPtr (non-const to const)") {
+		CBaseBPtr base1;
+		CConstBaseBPtr base2(base1);
+		CHECK_BASEB(base1, CI_BASEB, 2, 3);
+		CHECK_BASEB(base2, CI_BASEB, 2, 3);
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CDerivePtr to CConstDerivePtr (non-const to const)") {
+		CDerivePtr derive1;
+		CConstDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive1, 2, 3);
+		CHECK_DERIVE(derive2, 2, 3);
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+	}
+
+	/* (const to non-const) causes compile error */
+#if 0
+	CConstBaseAPtr base1;
+	CBaseAPtr base2(base1);
+#endif
 }
 
 DEFINE_TEST_GROUP(MoveConstructor)
 {
-	TEST_CASE("Shold be nullptr if input is nullptr") {
+	TEST_CASE("Test CBaseAPtr(nullptr) to CBaseAPtr/CConstBaseAPtr") {
 		CBaseAPtr base1(nullptr);
 		CBaseAPtr base2(std::move(base1));
+		CConstBaseAPtr base3(std::move(base1));
+		CHECK_EMPTY(base2);
+		CHECK_EMPTY(base3);
+	}
+
+	TEST_CASE("Test CBaseBPtr(nullptr) to CBaseBPtr/CConstBaseBPtr") {
+		CBaseBPtr base1(nullptr);
+		CBaseBPtr base2(std::move(base1));
+		CConstBaseBPtr base3(std::move(base1));
+		CHECK_EMPTY(base2);
+		CHECK_EMPTY(base3);
+	}
+
+	TEST_CASE("Test CDerivePtr(nullptr) to CDerivePtr/CConstDerivePtr") {
+		CDerivePtr derive1(nullptr);
+		CDerivePtr derive2(std::move(derive1));
+		CConstDerivePtr derive3(std::move(derive1));
+		CHECK_EMPTY(derive2);
+		CHECK_EMPTY(derive3);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr(nullptr) to CConstBaseAPtr") {
+		CConstBaseAPtr base1(nullptr);
+		CConstBaseAPtr basea2(std::move(base1));
+		CHECK_EMPTY(basea2);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr(nullptr) to CConstBaseBPtr") {
+		CConstBaseBPtr base1(nullptr);
+		CConstBaseBPtr base2(std::move(base1));
 		CHECK_EMPTY(base2);
 	}
 
-	TEST_CASE("Shold NOT increase Ref if input is not nullptr") {
+	TEST_CASE("Test CConstDerivePtr(nullptr) to CConstDerivePtr") {
+		CConstDerivePtr derive1(nullptr);
+		CConstDerivePtr derive2(std::move(derive1));
+		CHECK_EMPTY(derive2);
+	}
+
+	TEST_CASE("Test CBaseAPtr to CBaseAPtr (non-const to non-const)") {
 		CBaseAPtr base1;
-		CBaseAPtr base2(std::move(base1));
+		CBaseAPtr basea2(std::move(base1));
+		CHECK_EMPTY(base1);
+		CHECK_BASEA(basea2, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CBaseBPtr to CBaseBPtr (non-const to non-const)") {
+		CBaseBPtr base1;
+		CBaseBPtr base2(std::move(base1));
+		CHECK_EMPTY(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 3);
+	}
+
+	TEST_CASE("Test CDerivePtr to CDerivePtr (non-const to non-const)") {
+		CDerivePtr derive1;
+		CDerivePtr derive2(std::move(derive1));
+		CHECK_EMPTY(derive1);
+		CHECK_DERIVE(derive2, 1, 3);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr to CConstBaseAPtr (const to const)") {
+		CConstBaseAPtr base1;
+		CConstBaseAPtr base2(std::move(base1));
 		CHECK_EMPTY(base1);
 		CHECK_BASEA(base2, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr to CConstBaseBPtr (const to const)") {
+		CConstBaseBPtr base1;
+		CConstBaseBPtr base2(std::move(base1));
+		CHECK_EMPTY(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 2);
+	}
+
+	TEST_CASE("Test CConstDerivePtr to CConstDerivePtr (const to const)") {
+		CConstDerivePtr derive1;
+		CConstDerivePtr derive2(std::move(derive1));
+		CHECK_EMPTY(derive1);
+		CHECK_DERIVE(derive2, 1, 2);
+	}
+
+	TEST_CASE("Test CBaseAPtr to CConstBaseAPtr (non-const to const)") {
+		CBaseAPtr base1;
+		CConstBaseAPtr base2(std::move(base1));
+		CHECK_EMPTY(base1);
+		CHECK_BASEA(base2, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CBaseBPtr to CConstBaseBPtr (non-const to const)") {
+		CBaseBPtr base1;
+		CConstBaseBPtr base2(std::move(base1));
+		CHECK_EMPTY(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 3);
+	}
+
+	TEST_CASE("Test CDerivePtr to CConstDerivePtr (non-const to const)") {
+		CDerivePtr derive1;
+		CConstDerivePtr derive2(std::move(derive1));
+		CHECK_EMPTY(derive1);
+		CHECK_DERIVE(derive2, 1, 3);
 	}
 }
 
 DEFINE_TEST_GROUP(PointerConstructor)
 {
-	TEST_CASE("Should throw error if input is nullptr") {
+	TEST_CASE("Test nullptr to CBaseAPtr/CConstBaseAPtr") {
 		CBaseA *base1 = nullptr;
 		CBaseAPtr base2(base1);
 		CConstBaseAPtr base3(base1);
@@ -89,25 +342,67 @@ DEFINE_TEST_GROUP(PointerConstructor)
 		CHECK_EMPTY(base2);
 	}
 
-	TEST_CASE("Should succeed from same type (non-const to non-const)") {
+	TEST_CASE("Test CBaseA * to CBaseAPtr (non-const to non-const)") {
 		CBaseA *base1 = new CBaseA;
 		CBaseAPtr base2(base1);
 		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-		CHECK_SAME(base2.Get(), base1, HEX);
+		CHECK_SAME_PTR(base2.Get(), base1);
 	}
 
-	TEST_CASE("Should succeed from same type (const to const)") {
+	TEST_CASE("Test CBaseB * to CBaseBPtr (non-const to non-const)") {
+		CBaseB *base1 = new CBaseB;
+		CBaseBPtr base2(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 3);
+		CHECK_SAME_PTR(base2.Get(), base1);
+	}
+
+	TEST_CASE("Test CDerive * to CDerivePtr (non-const to non-const)") {
+		CDerive *derive1 = new CDerive;
+		CDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive2, 1, 3);
+		CHECK_SAME_PTR(derive2.Get(), derive1);
+	}
+
+	TEST_CASE("Test const CBaseA * to CConstBaseAPtr (const to const)") {
 		const CBaseA *base1 = new CBaseA;
 		CConstBaseAPtr base2(base1);
 		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-		CHECK_SAME(base2.Get(), base1, HEX);
+		CHECK_SAME_PTR(base2.Get(), base1);
 	}
 
-	TEST_CASE("Should succeed from same type (non-const to const)") {
-		CBaseA *base1 = new CBaseA;
-		CConstBaseAPtr base2(base1);
-		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-		CHECK_SAME(base2.Get(), base1, HEX);
+	TEST_CASE("Test const CBaseB * to CConstBaseBPtr (const to const)") {
+		const CBaseB *base1 = new CBaseB;
+		CConstBaseBPtr base2(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 2);
+		CHECK_SAME_PTR(base2.Get(), base1);
+	}
+
+	TEST_CASE("Test const CDerive * to CConstDerivePtr (const to const)") {
+		const CDerive *derive1 = new CDerive;
+		CConstDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive2, 1, 2);
+		CHECK_SAME_PTR(derive2.Get(), derive1);
+	}
+
+	TEST_CASE("Test CBaseA * to CConstBaseAPtr (non-const to const)") {
+		CBaseA *basea1 = new CBaseA;
+		CConstBaseAPtr basea2(basea1);
+		CHECK_BASEA(basea2, CI_BASEA, 1, 1);
+		CHECK_SAME_PTR(basea2.Get(), basea1);
+	}
+
+	TEST_CASE("Test CBaseB * to CConstBaseBPtr (non-const to const)") {
+		CBaseB *base1 = new CBaseB;
+		CConstBaseBPtr base2(base1);
+		CHECK_BASEB(base2, CI_BASEB, 1, 2);
+		CHECK_SAME_PTR(base2.Get(), base1);
+	}
+
+	TEST_CASE("Test CDerive * to CConstDerivePtr (non-const to const)") {
+		CDerive *derive1 = new CDerive;
+		CConstDerivePtr derive2(derive1);
+		CHECK_DERIVE(derive2, 1, 2);
+		CHECK_SAME_PTR(derive2.Get(), derive1);
 	}
 
 	/* Constructor from pointer from same type
@@ -117,25 +412,46 @@ DEFINE_TEST_GROUP(PointerConstructor)
 	CBaseAPtr base2(base1);
 #endif
 
-	TEST_CASE("Should succeed from derive type (non-const to non-const)") {
+	TEST_CASE("Test CDerive * to CBaseAPtr (non-const to non-const)") {
 		CDerive *derive = new CDerive();
 		CBaseAPtr base(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
-		CHECK_SAME(base.Get(), derive, HEX);
+		CHECK_SAME_PTR(base.Get(), derive);
 	}
 
-	TEST_CASE("Should succeed from derive type (const to const)") {
+	TEST_CASE("Test CDerive * to CBaseBPtr (non-const to non-const)") {
+		CDerive *derive = new CDerive();
+		CBaseBPtr base(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 3);
+		CHECK_SAME_PTR(base.Get(), derive);
+	}
+
+	TEST_CASE("Test const CDerive * to CConstBaseAPtr (const to const)") {
 		const CDerive *derive = new CDerive();
 		CConstBaseAPtr base(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
-		CHECK_SAME(base.Get(), derive, HEX);
+		CHECK_SAME_PTR(base.Get(), derive);
 	}
 
-	TEST_CASE("Should succeed from derive type (non-const to const)") {
+	TEST_CASE("Test const CDerive * to CConstBaseBPtr (const to const)") {
+		const CDerive *derive = new CDerive();
+		CConstBaseBPtr base(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 2);
+		CHECK_SAME_PTR(base.Get(), derive);
+	}
+
+	TEST_CASE("Test CDerive * to CConstBaseAPtr (non-const to const)") {
 		CDerive *derive = new CDerive();
 		CConstBaseAPtr base(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
-		CHECK_SAME(base.Get(), derive, HEX);
+		CHECK_SAME_PTR(base.Get(), derive);
+	}
+
+	TEST_CASE("Test CDerive * to CConstBaseBPtr (non-const to const)") {
+		CDerive *derive = new CDerive();
+		CConstBaseBPtr base(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 2);
+		CHECK_SAME_PTR(base.Get(), derive);
 	}
 
 	/* Constructor from pointer from derive type
@@ -145,29 +461,46 @@ DEFINE_TEST_GROUP(PointerConstructor)
 	CBaseAPtr base(derive);
 #endif
 
-	TEST_CASE("Should succeed from a valid base type (non-const to non-const)") {
+	TEST_CASE("Test CBaseA *(valid) to CDerivePtr (non-const to non-const)") {
 		CBaseA *base = new CDerive();
 		CDerivePtr derive(base);
-		/* For non-const instance, 2 weak ref will be hold.
-		 * One for non-const weakptr and the other for const weakptr */
 		CHECK_DERIVE(derive, 1, 3);
-		CHECK_SAME(derive.Get(), base, HEX);
+		CHECK_SAME_PTR(derive.Get(), base);
 	}
 
-	TEST_CASE("Should succeed from a valid base type (const to const)") {
+	TEST_CASE("Test CBaseB *(valid) to CDerivePtr (non-const to non-const)") {
+		CBaseB *base = new CDerive();
+		CDerivePtr derive(base);
+		CHECK_DERIVE(derive, 1, 3);
+		CHECK_SAME_PTR(derive.Get(), base);
+	}
+
+	TEST_CASE("Test const CBaseA *(valid) to CConstDerivePtr (const to const)") {
 		const CBaseA *base = new CDerive();
 		CConstDerivePtr derive(base);
-		/* For const instance, 1 weak ref will be hold.
-		 * non-const weakptr will be nullptr. */
 		CHECK_DERIVE(derive, 1, 2);
-		CHECK_SAME(derive.Get(), base, HEX);
+		CHECK_SAME_PTR(derive.Get(), base);
 	}
 
-	TEST_CASE("Should succeed from a valid base type (non-const to const)") {
+	TEST_CASE("Test const CBaseB *(valid) to CConstDerivePtr (const to const)") {
+		const CBaseB *base = new CDerive();
+		CConstDerivePtr derive(base);
+		CHECK_DERIVE(derive, 1, 2);
+		CHECK_SAME_PTR(derive.Get(), base);
+	}
+
+	TEST_CASE("Test CBaseA *(valid) to CConstDerivePtr (non-const to const)") {
 		CBaseA *base = new CDerive();
 		CConstDerivePtr derive(base);
 		CHECK_DERIVE(derive, 1, 2);
-		CHECK_SAME(derive.Get(), base, HEX);
+		CHECK_SAME_PTR(derive.Get(), base);
+	}
+
+	TEST_CASE("Test CBaseB *(valid) to CConstDerivePtr (non-const to const)") {
+		CBaseB *base = new CDerive();
+		CConstDerivePtr derive(base);
+		CHECK_DERIVE(derive, 1, 2);
+		CHECK_SAME_PTR(derive.Get(), base);
 	}
 
 	/* Constructor from pointer from a valid base type
@@ -177,7 +510,7 @@ DEFINE_TEST_GROUP(PointerConstructor)
 	CDerivePtr derive(base);
 #endif
 
-	TEST_CASE("Should throw error from an invalid base type") {
+	TEST_CASE("Test CBaseA *(invalid) to CDerivePtr") {
 		CBaseA *base = new CBaseA;
 		const CBaseA *cbase = base;
 		CHECK_THROW(CDerivePtr derive(base));
@@ -190,7 +523,20 @@ DEFINE_TEST_GROUP(PointerConstructor)
 #endif
 	}
 
-	TEST_CASE("The customer deleter should work") {
+	TEST_CASE("Test CBaseB *(invalid) to CDerivePtr") {
+		CBaseB *base = new CBaseB;
+		const CBaseB *cbase = base;
+		CHECK_THROW(CDerivePtr derive(base));
+		CHECK_THROW(CConstDerivePtr derive(cbase));
+		CHECK_THROW(CConstDerivePtr derive(base));
+	/* Constructor from pointer from an invalid base type
+	 * (const to non-const) causes compile error */
+#if 0
+		CHECK_THROW(CDerivPtr derive(cbase));;
+#endif
+	}
+
+	TEST_CASE("Test customer deleter") {
 		int i = 0;
 		{
 			CBaseA *base1 = new CBaseA;
@@ -200,122 +546,184 @@ DEFINE_TEST_GROUP(PointerConstructor)
 			});
 		}
 
-		CHECK(1 == i, "i: ", DEC(i));
+		CHECK(1 == i, "i: %d", i);
 	}
 }
 
 DEFINE_TEST_GROUP(MakeShared)
 {
-	TEST_CASE("Should work") {
+	TEST_CASE("Test CBaseAPtr (non-const to non-const)") {
 		CBaseAPtr base(MakeShared<CBaseA>());
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CBaseBPtr (non-const to non-const)") {
+		CBaseBPtr base(MakeShared<CBaseB>());
+		CHECK_BASEB(base, CI_BASEB, 1, 3);
+	}
+
+	TEST_CASE("Test CDerivePtr (non-const to non-const)") {
+		CDerivePtr derive(MakeShared<CDerive>());
+		CHECK_DERIVE(derive, 1, 3);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr (const to const)") {
+		CConstBaseAPtr base(MakeShared<const CBaseA>());
+		CHECK_BASEA(base, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr (const to const)") {
+		CConstBaseBPtr base(MakeShared<const CBaseB>());
+		CHECK_BASEB(base, CI_BASEB, 1, 2);
+	}
+
+	TEST_CASE("Test CConstDerivePtr (const to const)") {
+		CConstDerivePtr derive(MakeShared<const CDerive>());
+		CHECK_DERIVE(derive, 1, 2);
+	}
+
+	TEST_CASE("Test CConstBaseAPtr (non-const to const)") {
+		CConstBaseAPtr base(MakeShared<CBaseA>());
+		CHECK_BASEA(base, CI_BASEA, 1, 1);
+	}
+
+	TEST_CASE("Test CConstBaseBPtr (non-const to const)") {
+		CConstBaseBPtr base(MakeShared<CBaseB>());
+		CHECK_BASEB(base, CI_BASEB, 1, 3);
+	}
+
+	TEST_CASE("Test CConstDerivePtr (non-const to const)") {
+		CConstDerivePtr derive(MakeShared<CDerive>());
+		CHECK_DERIVE(derive, 1, 3);
 	}
 }
 
 DEFINE_TEST_GROUP(SharedPtrLrefConstructor)
 {
-	TEST_CASE("Should be nullptr if input is nullptr") {
-		CBaseAPtr base1(nullptr);
-		CBaseAPtr base2(base1);
-		CHECK_EMPTY(base2);
-	}
-
-	TEST_CASE("Should work from same type (non-const to non-const)") {
-		CBaseAPtr base1;
-		CBaseAPtr base2(base1);
-		CHECK_BASEA(base1, CI_BASEA, 2, 1);
-		CHECK_BASEA(base2, CI_BASEA, 2, 1);
-		CHECK_SAME_PTR(base1, base2);
-	}
-
-	TEST_CASE("Should work from same type (const to const)") {
-		CConstBaseAPtr base1;
-		CConstBaseAPtr base2(base1);
-		CHECK_BASEA(base1, CI_BASEA, 2, 1);
-		CHECK_BASEA(base2, CI_BASEA, 2, 1);
-		CHECK_SAME_PTR(base1, base2);
-	}
-
-	TEST_CASE("Should work from same type (non-const to const)") {
-		CBaseAPtr base1;
-		CConstBaseAPtr base2(base1);
-		CHECK_BASEA(base1, CI_BASEA, 2, 1);
-		CHECK_BASEA(base2, CI_BASEA, 2, 1);
-		CHECK_SAME_PTR(base1, base2);
-	}
-
-	/* Constructor from CSharedPtr (lref) same type
-	 * (const to non-const) causes compile error */
-#if 0
-	CConstBaseAPtr base1;
-	CBaseAPtr base2(base1);
-#endif
-
-	TEST_CASE("Should work from derive (non-const to non-const)") {
+	TEST_CASE("Test from CDerivePtr to CBaseAPtr (non-const to non-const)") {
 		CDerivePtr derive;
 		CBaseAPtr base(derive);
 		CHECK_DERIVE(derive, 2, 3);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 3);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	TEST_CASE("Should work from derive (const to const)") {
+	TEST_CASE("Test from CDerivePtr to CBaseBPtr (non-const to non-const)") {
+		CDerivePtr derive;
+		CBaseBPtr base(derive);
+		CHECK_DERIVE(derive, 2, 5);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 5);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	TEST_CASE("Test from CConstDerivePtr to CConstBaseAPtr (const to const)") {
 		CConstDerivePtr derive;
 		CConstBaseAPtr base(derive);
 		CHECK_DERIVE(derive, 2, 2);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 2);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	TEST_CASE("Should work from derive (non-const to const)") {
+	TEST_CASE("Test from CConstDerivePtr to CConstBaseBPtr (const to const)") {
+		CConstDerivePtr derive;
+		CConstBaseBPtr base(derive);
+		CHECK_DERIVE(derive, 2, 3);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 3);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	TEST_CASE("Test from CDerivePtr to CConstBaseAPtr (non-const to const)") {
 		CDerivePtr derive;
 		CConstBaseAPtr base(derive);
 		CHECK_DERIVE(derive, 2, 3);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 3);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	/* Constructor from CSharedPtr (lref) from derive
-	 * (const to non-const) causes compile error */
+	TEST_CASE("Test from CDerivePtr to CConstBaseBPtr (non-const to const)") {
+		CDerivePtr derive;
+		CConstBaseBPtr base(derive);
+		CHECK_DERIVE(derive, 2, 4);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 4);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	/* (const to non-const) causes compile error */
 #if 0
 	CConstDerivePtr derive;
 	CBaseAPtr base(derive);
 #endif
 
-	TEST_CASE("Should work from a valid base (non-const to non-const)") {
+	TEST_CASE("Test from CBaseAPtr(valid) to CDerivePtr (non-const to non-const)") {
 		CBaseAPtr base(new CDerive());
 		CDerivePtr derive(base);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 3);
 		CHECK_DERIVE(derive, 2, 3);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	TEST_CASE("Should work from a valid base (const to const)") {
+	TEST_CASE("Test from CBaseBPtr(valid) to CDerivePtr (non-const to non-const)") {
+		CBaseBPtr base(new CDerive());
+		CDerivePtr derive(base);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 5);
+		CHECK_DERIVE(derive, 2, 5);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	TEST_CASE("Test from CConstBaseAPtr(valid) to CConstDerivePtr (const to const)") {
 		CConstBaseAPtr base(new CDerive());
 		CConstDerivePtr derive(base);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 2);
 		CHECK_DERIVE(derive, 2, 2);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	TEST_CASE("Should work from a valid base (non-const to const)") {
+	TEST_CASE("Test from CConstBaseBPtr(valid) to CConstDerivePtr (const to const)") {
+		CConstBaseBPtr base(new CDerive());
+		CConstDerivePtr derive(base);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 3);
+		CHECK_DERIVE(derive, 2, 3);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	TEST_CASE("Test from CBaseAPtr(valid) to CConstDerivePtr (non-const to const)") {
 		CBaseAPtr base(new CDerive());
 		CConstDerivePtr derive(base);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 2);
 		CHECK_DERIVE(derive, 2, 2);
-		CHECK_SAME_PTR(base, derive);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
 	}
 
-	/* Constructor from CSharedPtr (lref) from a valid base
-	 * (const to non-const) causes compile error */
+	TEST_CASE("Test from CBaseBPtr(valid) to CConstDerivePtr (non-const to const)") {
+		CBaseBPtr base(new CDerive());
+		CConstDerivePtr derive(base);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 2, 4);
+		CHECK_DERIVE(derive, 2, 4);
+		CHECK_SAME_PTR(base.Get(), derive.Get());
+	}
+
+	/* (const to non-const) causes compile error */
 #if 0
 	CConstBaseAPtr base(new CDerive());
 	CDerivePtr derive(base);
 #endif
 
-	TEST_CASE("Should work from an invalid base") {
+	TEST_CASE("Test from CBaseAPtr(invalid) to CDerivePtr") {
 		CBaseAPtr base;
 		CConstBaseAPtr cbase;
+		CHECK_THROW(CDerivePtr derive(base));
+		CHECK_THROW(CConstDerivePtr derive(base));
+		CHECK_THROW(CConstDerivePtr derive(cbase));
+		/* Constructor from CSharedPtr (lref) from an invalid base type
+		 * (const to non-const) causes compile error */
+#if 0
+		CHECK_THROW(CDerivePtr derive(cbase));
+#endif
+	}
+
+	TEST_CASE("Test from CBaseBPtr(invalid) to CDerivePtr") {
+		CBaseBPtr base;
+		CConstBaseBPtr cbase;
 		CHECK_THROW(CDerivePtr derive(base));
 		CHECK_THROW(CConstDerivePtr derive(base));
 		CHECK_THROW(CConstDerivePtr derive(cbase));
@@ -329,103 +737,127 @@ DEFINE_TEST_GROUP(SharedPtrLrefConstructor)
 
 DEFINE_TEST_GROUP(SharedPtrRrefConstructor)
 {
-	TEST_CASE("Should be nullptr if input is nullptr") {
-		CBaseAPtr base1(nullptr);
-		CBaseAPtr base2(std::move(base1));
-		CHECK_EMPTY(base2);
-	}
-
-
-	TEST_CASE("Should work from same type (non-const to non-const)") {
-		CBaseAPtr base1;
-		CBaseAPtr base2(std::move(base1));
-		CHECK_EMPTY(base1);
-		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-	}
-
-	TEST_CASE("Should work from same type (const to const)") {
-		CConstBaseAPtr base1;
-		CConstBaseAPtr base2(std::move(base1));
-		CHECK_EMPTY(base1);
-		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-	}
-
-	TEST_CASE("Should work from same type (non-const to const)") {
-		CBaseAPtr base1;
-		CConstBaseAPtr base2(std::move(base1));
-		CHECK_EMPTY(base1);
-		CHECK_BASEA(base2, CI_BASEA, 1, 1);
-	}
-
-	/* Constructor from CSharedPtr (rref) from same type
-	 * (const to non-const) causes compile error */
-#if 0
-	CConstBaseAPtr base1;
-	CBaseAPtr base2(std::move(base1));
-#endif
-
-	TEST_CASE("Should work from derive (non-const to non-const)") {
+	TEST_CASE("Test from CDerivePtr to CBaseAPtr (non-const to non-const)") {
 		CDerivePtr derive;
 		CBaseAPtr base(std::move(derive));
 		CHECK_EMPTY(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 3);
 	}
 
-	TEST_CASE("Should work from derive (const to const)") {
+	TEST_CASE("Test from CDerivePtr to CBaseBPtr (non-const to non-const)") {
+		CDerivePtr derive;
+		CBaseBPtr base(std::move(derive));
+		CHECK_EMPTY(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 5);
+	}
+
+	TEST_CASE("Test from CConstDerivePtr to CConstBaseAPtr (const to const)") {
 		CConstDerivePtr derive;
 		CConstBaseAPtr base(std::move(derive));
 		CHECK_EMPTY(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 2);
 	}
 
-	TEST_CASE("Should work from derive (non-const to const)") {
+	TEST_CASE("Test from CConstDerivePtr to CConstBaseBPtr (const to const)") {
+		CConstDerivePtr derive;
+		CConstBaseBPtr base(std::move(derive));
+		CHECK_EMPTY(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 3);
+	}
+
+	TEST_CASE("Test from CDerivePtr to CConstBaseAPtr (non-const to const)") {
 		CDerivePtr derive;
 		CConstBaseAPtr base(std::move(derive));
 		CHECK_EMPTY(derive);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 3);
 	}
 
-	/* Constructor from CSharedPtr (rref) from derive
-	 * (const to non-const) causes compile error */
+	TEST_CASE("Test from CDerivePtr to CConstBaseBPtr (non-const to const)") {
+		CDerivePtr derive;
+		CConstBaseBPtr base(std::move(derive));
+		CHECK_EMPTY(derive);
+		CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 4);
+	}
+
+	/* (const to non-const) causes compile error */
 #if 0
 	CConstDerivePtr derive;
-	CBaseAPtr base(std::move(derive));
+	CBaseAPtr base(derive);
 #endif
 
-	TEST_CASE("Should work from a valid base (non-const to non-const)") {
-		CDerivePtr derive1;
-		CBaseAPtr base(derive1);
-		CDerivePtr derive2(std::move(base));
+	TEST_CASE("Test from CBaseAPtr(valid) to CDerivePtr (non-const to non-const)") {
+		CBaseAPtr base(new CDerive());
+		CDerivePtr derive(std::move(base));
 		CHECK_EMPTY(base);
-		CHECK_DERIVE(derive1, 2, 3)
-		CHECK_DERIVE(derive2, 2, 3);
+		CHECK_DERIVE(derive, 1, 3);
 	}
 
-	TEST_CASE("Should work from a valid base (const to const)") {
-		CConstDerivePtr derive1;
-		CConstBaseAPtr base(derive1);
-		CConstDerivePtr derive2(std::move(base));
+	TEST_CASE("Test from CBaseBPtr(valid) to CDerivePtr (non-const to non-const)") {
+		CBaseBPtr base(new CDerive());
+		CDerivePtr derive(std::move(base));
 		CHECK_EMPTY(base);
-		CHECK_DERIVE(derive1, 2, 2)
-		CHECK_DERIVE(derive2, 2, 2);
+		CHECK_DERIVE(derive, 1, 5);
 	}
 
-	TEST_CASE("Should work from a valid base (non-const to const)") {
-		CDerivePtr derive1;
-		CBaseAPtr base(derive1);
-		CConstDerivePtr derive2(std::move(base));
+	TEST_CASE("Test from CConstBaseAPtr(valid) to CConstDerivePtr (const to const)") {
+		CConstBaseAPtr base(new CDerive());
+		CConstDerivePtr derive(std::move(base));
 		CHECK_EMPTY(base);
-		CHECK_DERIVE(derive1, 2, 3)
-		CHECK_DERIVE(derive2, 2, 3);
+		CHECK_DERIVE(derive, 1, 2);
 	}
 
-	/* Constructor from CSharedPtr (rref) from a valid base
-	 * (const to non-const) causes compile error */
+	TEST_CASE("Test from CConstBaseBPtr(valid) to CConstDerivePtr (const to const)") {
+		CConstBaseBPtr base(new CDerive());
+		CConstDerivePtr derive(std::move(base));
+		CHECK_EMPTY(base);
+		CHECK_DERIVE(derive, 1, 3);
+	}
+
+	TEST_CASE("Test from CBaseAPtr(valid) to CConstDerivePtr (non-const to const)") {
+		CBaseAPtr base(new CDerive());
+		CConstDerivePtr derive(std::move(base));
+		CHECK_EMPTY(base);
+		CHECK_DERIVE(derive, 1, 2);
+	}
+
+	TEST_CASE("Test from CBaseBPtr(valid) to CConstDerivePtr (non-const to const)") {
+		CBaseBPtr base(new CDerive());
+		CConstDerivePtr derive(std::move(base));
+		CHECK_EMPTY(base);
+		CHECK_DERIVE(derive, 1, 4);
+	}
+
+	/* (const to non-const) causes compile error */
 #if 0
-	CConstDerivePtr derive1;
-	CConstBaseAPtr base(derive1);
-	CDerivePtr derive2(std::move(base));
+	CConstBaseAPtr base(new CDerive());
+	CDerivePtr derive(base);
 #endif
+
+	TEST_CASE("Test from CBaseAPtr(invalid) to CDerivePtr") {
+		CBaseAPtr base;
+		CConstBaseAPtr cbase;
+		CHECK_THROW(CDerivePtr derive(std::move(base)));
+		CHECK_THROW(CConstDerivePtr derive(std::move(base)));
+		CHECK_THROW(CConstDerivePtr derive(std::move(cbase)));
+		/* Constructor from CSharedPtr (lref) from an invalid base type
+		 * (const to non-const) causes compile error */
+#if 0
+		CHECK_THROW(CDerivePtr derive(cbase));
+#endif
+	}
+
+	TEST_CASE("Test from CBaseBPtr(invalid) to CDerivePtr") {
+		CBaseBPtr base;
+		CConstBaseBPtr cbase;
+		CHECK_THROW(CDerivePtr derive(std::move(base)));
+		CHECK_THROW(CConstDerivePtr derive(std::move(base)));
+		CHECK_THROW(CConstDerivePtr derive(std::move(cbase)));
+		/* Constructor from CSharedPtr (lref) from an invalid base type
+		 * (const to non-const) causes compile error */
+#if 0
+		CHECK_THROW(CDerivePtr derive(cbase));
+#endif
+	}
 }
 
 DEFINE_TEST_GROUP(SharedPtrMixConstructor)
@@ -438,7 +870,7 @@ DEFINE_TEST_GROUP(SharedPtrMixConstructor)
 		CDerivePtr derive(i, j, k);
 		CHECK_DERIVE(derive, 1, 3);
 		CHECK(100 + 1 + 2 + 3 == derive->Get(),
-				"derive->Get(): ", DEC(derive->Get()));
+				"derive->Get(): %d", derive->Get());
 	}
 
 	TEST_CASE("Should work for lref, rref, lref") {
@@ -449,7 +881,7 @@ DEFINE_TEST_GROUP(SharedPtrMixConstructor)
 		CDerivePtr derive(i, std::move(j), k);
 		CHECK_DERIVE(derive, 1, 3);
 		CHECK(200 + 1 + 2 + 3 == derive->Get(),
-				"derive->Get(): ", DEC(derive->Get()));
+				"derive->Get(): %d", derive->Get());
 	}
 
 	TEST_CASE("Should work for lref, rref, rref") {
@@ -460,7 +892,7 @@ DEFINE_TEST_GROUP(SharedPtrMixConstructor)
 		CDerivePtr derive(i, std::move(j), std::move(k));
 		CHECK_DERIVE(derive, 1, 3);
 		CHECK(200 + 1 + 2 + 3 == derive->Get(),
-				"derive->Get(): ", DEC(derive->Get()));
+				"derive->Get(): %d", derive->Get());
 	}
 }
 

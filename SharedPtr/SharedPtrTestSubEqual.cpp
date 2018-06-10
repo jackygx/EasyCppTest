@@ -35,7 +35,7 @@ DEFINE_TEST_GROUP(SubEqualFromNull)
 
 		derive -= nullptr;
 		CHECK_DERIVE(derive, 1, 3);
-		CHECK(derive->Get() == 10, "Derive: ", DEC(derive->Get()));
+		CHECK(derive->Get() == 10, "Derive: %d", derive->Get());
 	}
 }
 
@@ -55,7 +55,7 @@ DEFINE_TEST_GROUP(SubEqualFromOverload)
 
 		derive -= i;
 		CHECK_DERIVE(derive, 1, 3);
-		CHECK(derive->Get() == 20, "Derive: ", DEC(derive->Get()));
+		CHECK(derive->Get() == 20, "Derive: %d", derive->Get());
 	}
 }
 
@@ -82,7 +82,7 @@ DEFINE_TEST_GROUP(SubEqualFromConstructor)
 
 		derive -= 10;
 		CHECK_DERIVE(derive, 1, 3);
-		CHECK(derive->Get() == 20, "Derive: ", DEC(derive->Get()));
+		CHECK(derive->Get() == 20, "Derive: %d", derive->Get());
 	}
 
 	TEST_CASE("Call overload when non-empty pointer adds equal to implicit conversion") {
@@ -92,7 +92,7 @@ DEFINE_TEST_GROUP(SubEqualFromConstructor)
 
 		derive -= i;
 		CHECK_DERIVE(derive, 1, 3);
-		CHECK(derive->Get() == 20, "Derive: ", DEC(derive->Get()));
+		CHECK(derive->Get() == 20, "Derive: %d", derive->Get());
 	}
 }
 

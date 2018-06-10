@@ -21,55 +21,178 @@
 
 DEFINE_TEST_GROUP(Token)
 {
-	TEST_CASE("Copy create from token") {
+	TEST_CASE("Test CBaseAPtr copy from token (non-const)") {
 		CBaseAPtr base;
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 
-		CBaseAPtr *token = (CBaseAPtr *)base.ToToken();
+		void *token = base.ToToken();
 		CHECK_BASEA(base, CI_BASEA, 2, 1);
 
-		CBaseAPtr base1(*token);
+		CBaseAPtr base1((CBaseAToken *)token);
 		CHECK_BASEA(base, CI_BASEA, 3, 1);
 		CHECK_BASEA(base1, CI_BASEA, 3, 1);
-		CHECK_SAME_PTR(base, base1);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
 
-		CBaseAPtr base2(*token);
+		CBaseAPtr base2((CBaseAToken *)token);
 		CHECK_BASEA(base, CI_BASEA, 4, 1);
 		CHECK_BASEA(base1, CI_BASEA, 4, 1);
 		CHECK_BASEA(base2, CI_BASEA, 4, 1);
-		CHECK_SAME_PTR(base, base1);
-		CHECK_SAME_PTR(base1, base2);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
 
-		token->Release();
+		((CBaseAToken *)token)->Release();
 		token = nullptr;
 
 		CHECK_BASEA(base, CI_BASEA, 3, 1);
 		CHECK_BASEA(base1, CI_BASEA, 3, 1);
 		CHECK_BASEA(base2, CI_BASEA, 3, 1);
-		CHECK_SAME_PTR(base, base1);
-		CHECK_SAME_PTR(base1, base2);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
 	}
 
-	TEST_CASE("Move create from token") {
-		CBaseAPtr base;
+	TEST_CASE("Test CBaseBPtr copy from token (non-const)") {
+		CBaseBPtr base;
+		CHECK_BASEB(base, CI_BASEB, 1, 3);
+
+		void *token = base.ToToken();
+		CHECK_BASEB(base, CI_BASEB, 2, 3);
+
+		CBaseBPtr base1((CBaseBToken *)token);
+		CHECK_BASEB(base, CI_BASEB, 3, 3);
+		CHECK_BASEB(base1, CI_BASEB, 3, 3);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+
+		CBaseBPtr base2((CBaseBToken *)token);
+		CHECK_BASEB(base, CI_BASEB, 4, 3);
+		CHECK_BASEB(base1, CI_BASEB, 4, 3);
+		CHECK_BASEB(base2, CI_BASEB, 4, 3);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+
+		((CBaseBToken *)token)->Release();
+		token = nullptr;
+
+		CHECK_BASEB(base, CI_BASEB, 3, 3);
+		CHECK_BASEB(base1, CI_BASEB, 3, 3);
+		CHECK_BASEB(base2, CI_BASEB, 3, 3);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CDerivePtr copy from token (non-const)") {
+		CDerivePtr derive;
+		CHECK_DERIVE(derive, 1, 3);
+
+		void *token = derive.ToToken();
+		CHECK_DERIVE(derive, 2, 3);
+
+		CDerivePtr derive1((CDeriveToken *)token);
+		CHECK_DERIVE(derive, 3, 3);
+		CHECK_DERIVE(derive1, 3, 3);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+
+		CDerivePtr derive2((CDeriveToken *)token);
+		CHECK_DERIVE(derive, 4, 3);
+		CHECK_DERIVE(derive1, 4, 3);
+		CHECK_DERIVE(derive2, 4, 3);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+
+		((CDeriveToken *)token)->Release();
+		token = nullptr;
+
+		CHECK_DERIVE(derive, 3, 3);
+		CHECK_DERIVE(derive1, 3, 3);
+		CHECK_DERIVE(derive2, 3, 3);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+	}
+
+	TEST_CASE("Test CConstBaseAPtr copy from token (const)") {
+		CConstBaseAPtr base;
 		CHECK_BASEA(base, CI_BASEA, 1, 1);
 
-		CBaseAPtr *token = (CBaseAPtr *)base.ToToken();
+		void *token = base.ToToken();
 		CHECK_BASEA(base, CI_BASEA, 2, 1);
 
-		CBaseAPtr base1(std::move(*token));
-		CHECK_BASEA(base, CI_BASEA, 2, 1);
-		CHECK_BASEA(base1, CI_BASEA, 2, 1);
-		CHECK_SAME_PTR(base, base1);
+		CConstBaseAPtr base1((CConstBaseAToken *)token);
+		CHECK_BASEA(base, CI_BASEA, 3, 1);
+		CHECK_BASEA(base1, CI_BASEA, 3, 1);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
 
-		CBaseAPtr base2(std::move(*token));
-		CHECK_EMPTY(base2);
+		CConstBaseAPtr base2((CConstBaseAToken *)token);
+		CHECK_BASEA(base, CI_BASEA, 4, 1);
+		CHECK_BASEA(base1, CI_BASEA, 4, 1);
+		CHECK_BASEA(base2, CI_BASEA, 4, 1);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
 
-		CBaseAPtr base3(*token);
-		CHECK_EMPTY(base3);
-
-		token->Release();
+		((CConstBaseAToken *)token)->Release();
 		token = nullptr;
+
+		CHECK_BASEA(base, CI_BASEA, 3, 1);
+		CHECK_BASEA(base1, CI_BASEA, 3, 1);
+		CHECK_BASEA(base2, CI_BASEA, 3, 1);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CConstBaseBPtr copy from token (const)") {
+		CConstBaseBPtr base;
+		CHECK_BASEB(base, CI_BASEB, 1, 2);
+
+		void *token = base.ToToken();
+		CHECK_BASEB(base, CI_BASEB, 2, 2);
+
+		CConstBaseBPtr base1((CConstBaseBToken *)token);
+		CHECK_BASEB(base, CI_BASEB, 3, 2);
+		CHECK_BASEB(base1, CI_BASEB, 3, 2);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+
+		CConstBaseBPtr base2((CConstBaseBToken *)token);
+		CHECK_BASEB(base, CI_BASEB, 4, 2);
+		CHECK_BASEB(base1, CI_BASEB, 4, 2);
+		CHECK_BASEB(base2, CI_BASEB, 4, 2);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+
+		((CConstBaseBToken *)token)->Release();
+		token = nullptr;
+
+		CHECK_BASEB(base, CI_BASEB, 3, 2);
+		CHECK_BASEB(base1, CI_BASEB, 3, 2);
+		CHECK_BASEB(base2, CI_BASEB, 3, 2);
+		CHECK_SAME_PTR(base.Get(), base1.Get());
+		CHECK_SAME_PTR(base1.Get(), base2.Get());
+	}
+
+	TEST_CASE("Test CConstDerivePtr copy from token (const)") {
+		CConstDerivePtr derive;
+		CHECK_DERIVE(derive, 1, 2);
+
+		void *token = derive.ToToken();
+		CHECK_DERIVE(derive, 2, 2);
+
+		CConstDerivePtr derive1((CConstDeriveToken *)token);
+		CHECK_DERIVE(derive, 3, 2);
+		CHECK_DERIVE(derive1, 3, 2);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+
+		CConstDerivePtr derive2((CConstDeriveToken *)token);
+		CHECK_DERIVE(derive, 4, 2);
+		CHECK_DERIVE(derive1, 4, 2);
+		CHECK_DERIVE(derive2, 4, 2);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
+
+		((CConstDeriveToken *)token)->Release();
+		token = nullptr;
+
+		CHECK_DERIVE(derive, 3, 2);
+		CHECK_DERIVE(derive1, 3, 2);
+		CHECK_DERIVE(derive2, 3, 2);
+		CHECK_SAME_PTR(derive.Get(), derive1.Get());
+		CHECK_SAME_PTR(derive1.Get(), derive2.Get());
 	}
 }
 

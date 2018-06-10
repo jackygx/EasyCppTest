@@ -46,7 +46,8 @@ public:
 	}
 };
 
-class CBaseB
+class CBaseB :
+	public CEnableSharedPtr<CBaseB>
 {
 public:
 	virtual ~CBaseB(void) {}
@@ -58,6 +59,16 @@ public:
 	inline enum ClassIdentify Identify(void) const
 	{
 		return CI_BASEB;
+	}
+
+	inline decltype(auto) ShareTest(void)
+	{
+		return Share();
+	}
+
+	inline decltype(auto) ConstShareTest(void) const
+	{
+		return Share();
 	}
 };
 

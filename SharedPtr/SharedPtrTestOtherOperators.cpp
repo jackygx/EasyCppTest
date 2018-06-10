@@ -26,7 +26,7 @@ DEFINE_TEST_GROUP(OperatorSquareBracket)
 		CTypeDeriveSquareBracketsPtr i(10);
 		CHECK_DERIVE(derive, 1, 3);
 
-		CHECK(30 == derive[i], "derive: ", DEC(derive->Get()));
+		CHECK(30 == derive[i], "derive: %d", derive->Get());
 	}
 
 	TEST_CASE("Should work for const type") {
@@ -34,7 +34,7 @@ DEFINE_TEST_GROUP(OperatorSquareBracket)
 		CTypeDeriveSquareBracketsPtr i(10);
 		CHECK_DERIVE(derive, 1, 2);
 
-		CHECK(30 == derive[i], "derive: ", DEC(derive->Get()));
+		CHECK(30 == derive[i], "derive: %d", derive->Get());
 	}
 }
 

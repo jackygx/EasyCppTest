@@ -45,7 +45,7 @@ DEFINE_TEST_GROUP(Get)
 		CHECK_DERIVE(derive, 1, 3);
 
 		CHECK(20 == derive.Get()->Get(),
-			  "derive: ", DEC(derive.Get()->Get()));
+			  "derive: %d", derive.Get()->Get());
 	}
 
 	TEST_CASE("Should work for const type") {
@@ -53,7 +53,7 @@ DEFINE_TEST_GROUP(Get)
 		CHECK_DERIVE(derive, 1, 2);
 
 		CHECK(20 == derive.Get()->Get(),
-			  "const derive: ", DEC(derive.Get()->Get()));
+			  "const derive: %d", derive.Get()->Get());
 	}
 }
 
@@ -64,14 +64,14 @@ DEFINE_TEST_GROUP(Swap)
 		CDerivePtr derive2(20);
 		CHECK_DERIVE(derive1, 1, 3);
 		CHECK_DERIVE(derive2, 1, 3);
-		CHECK(10 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(10 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
 
 		derive1.Swap(derive2);
 		CHECK_DERIVE(derive1, 1, 3);
 		CHECK_DERIVE(derive2, 1, 3);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(10 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(10 == derive2->Get(), "derive2: %d", derive2->Get());
 	}
 
 	TEST_CASE("Should work between same type (const to const)") {
@@ -79,14 +79,14 @@ DEFINE_TEST_GROUP(Swap)
 		CConstDerivePtr derive2(20);
 		CHECK_DERIVE(derive1, 1, 2);
 		CHECK_DERIVE(derive2, 1, 2);
-		CHECK(10 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(10 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
 
 		derive1.Swap(derive2);
 		CHECK_DERIVE(derive1, 1, 2);
 		CHECK_DERIVE(derive2, 1, 2);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(10 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(10 == derive2->Get(), "derive2: %d", derive2->Get());
 	}
 
 	TEST_CASE("Should work between valid parent and derive (non-const to non-const)") {
@@ -96,8 +96,8 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 1, 3);
 		CHECK_DERIVE(derive2, 2, 3);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 3);
-		CHECK(10 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(10 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
 
 		derive1.Swap(base);			/* derive1 -> 20 */
 									/* derive2 -> 20 */
@@ -106,9 +106,9 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 2, 3);
 		CHECK_DERIVE(derive2, 2, 3);
 		CHECK_DERIVE(derive3, 2, 3);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
-		CHECK(10 == derive3->Get(), "derive3: ", DEC(derive3->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
+		CHECK(10 == derive3->Get(), "derive3: %d", derive3->Get());
 
 		base.Swap(derive2);			/* derive1 -> 20 */
 									/* derive2 -> 10 */
@@ -117,9 +117,9 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 3, 3);
 		CHECK_DERIVE(derive2, 1, 3);
 		CHECK_DERIVE(derive3, 3, 3);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(10 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
-		CHECK(20 == derive3->Get(), "derive3: ", DEC(derive3->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(10 == derive2->Get(), "derive2: %d", derive2->Get());
+		CHECK(20 == derive3->Get(), "derive3: %d", derive3->Get());
 	}
 
 	TEST_CASE("Should work between same type (const to const)") {
@@ -129,8 +129,8 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 1, 2);
 		CHECK_DERIVE(derive2, 2, 2);
 		CHECK_BASEA(base, CI_BASEA_DERIVE, 2, 2);
-		CHECK(10 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
+		CHECK(10 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
 
 		derive1.Swap(base);					/* derive1 -> 20 */
 											/* derive2 -> 20 */
@@ -139,9 +139,9 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 2, 2);
 		CHECK_DERIVE(derive2, 2, 2);
 		CHECK_DERIVE(derive3, 2, 2);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(20 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
-		CHECK(10 == derive3->Get(), "derive3: ", DEC(derive3->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(20 == derive2->Get(), "derive2: %d", derive2->Get());
+		CHECK(10 == derive3->Get(), "derive3: %d", derive3->Get());
 
 		base.Swap(derive2);					/* derive1 -> 20 */
 											/* derive2 -> 10 */
@@ -150,9 +150,9 @@ DEFINE_TEST_GROUP(Swap)
 		CHECK_DERIVE(derive1, 3, 2);
 		CHECK_DERIVE(derive2, 1, 2);
 		CHECK_DERIVE(derive3, 3, 2);
-		CHECK(20 == derive1->Get(), "derive1: ", DEC(derive1->Get()));
-		CHECK(10 == derive2->Get(), "derive2: ", DEC(derive2->Get()));
-		CHECK(20 == derive3->Get(), "derive3: ", DEC(derive3->Get()));
+		CHECK(20 == derive1->Get(), "derive1: %d", derive1->Get());
+		CHECK(10 == derive2->Get(), "derive2: %d", derive2->Get());
+		CHECK(20 == derive3->Get(), "derive3: %d", derive3->Get());
 	}
 
 /* Swap between const and non-const should now work */

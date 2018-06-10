@@ -24,19 +24,19 @@ DEFINE_TEST_GROUP(IsEqualFromNull)
 	TEST_CASE("Empty pointer is equal to nullptr") {
 		CBaseAPtr base(nullptr);
 
-		CHECK(base == nullptr, "base: ", HEX(base.Get()));
-		CHECK(nullptr == base, "base: ", HEX(base.Get()));
-		CHECK(!(base != nullptr), "base: ", HEX(base.Get()));
-		CHECK(!(nullptr != base), "base: ", HEX(base.Get()));
+		CHECK(base == nullptr, "base: %p", base.Get());
+		CHECK(nullptr == base, "base: %p", base.Get());
+		CHECK(!(base != nullptr), "base: %p", base.Get());
+		CHECK(!(nullptr != base), "base: %p", base.Get());
 	}
 
 	TEST_CASE("Non-empty pointer is not equal to nullptr") {
 		CBaseAPtr base;
 
-		CHECK(base != nullptr, "base: ", HEX(base.Get()));
-		CHECK(nullptr != base, "base: ", HEX(base.Get()));
-		CHECK(!(base == nullptr), "base: ", HEX(base.Get()));
-		CHECK(!(nullptr == base), "base: ", HEX(base.Get()));
+		CHECK(base != nullptr, "base: %p", base.Get());
+		CHECK(nullptr != base, "base: %p", base.Get());
+		CHECK(!(base == nullptr), "base: %p", base.Get());
+		CHECK(!(nullptr == base), "base: %p", base.Get());
 	}
 }
 
@@ -46,10 +46,10 @@ DEFINE_TEST_GROUP(IsEqualFromOverload)
 		CDerivePtr derive(nullptr);
 		CTypeDeriveIsEqualPtr i(10);
 
-		CHECK(derive != i, "derive: ", HEX(derive.Get()));
-		CHECK(i != derive, "derive: ", HEX(derive.Get()));
-		CHECK(!(derive == i), "derive: ", HEX(derive.Get()));
-		CHECK(!(i == derive), "derive: ", HEX(derive.Get()));
+		CHECK(derive != i, "derive: %p", derive.Get());
+		CHECK(i != derive, "derive: %p", derive.Get());
+		CHECK(!(derive == i), "derive: %p", derive.Get());
+		CHECK(!(i == derive), "derive: %p", derive.Get());
 	}
 
 	TEST_CASE("Non-empty pointer may equal to overload") {
@@ -57,15 +57,15 @@ DEFINE_TEST_GROUP(IsEqualFromOverload)
 		CTypeDeriveIsEqualPtr i(10);
 		CTypeDeriveIsEqualPtr j(20);
 
-		CHECK(derive == i, "derive: ", DEC(derive->Get()));
-		CHECK(i == derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive != i), "derive: ", DEC(derive->Get()));
-		CHECK(!(i != derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive == i, "derive: %d", derive->Get());
+		CHECK(i == derive, "derive: %d", derive->Get());
+		CHECK(!(derive != i), "derive: %d", derive->Get());
+		CHECK(!(i != derive), "derive: %d", derive->Get());
 
-		CHECK(derive != j, "derive: ", DEC(derive->Get()));
-		CHECK(j != derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive == j), "derive: ", DEC(derive->Get()));
-		CHECK(!(j == derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive != j, "derive: %d", derive->Get());
+		CHECK(j != derive, "derive: %d", derive->Get());
+		CHECK(!(derive == j), "derive: %d", derive->Get());
+		CHECK(!(j == derive), "derive: %d", derive->Get());
 	}
 }
 
@@ -74,34 +74,34 @@ DEFINE_TEST_GROUP(IsEqualFromConstructor)
 	TEST_CASE("Empty pointer is not equal to constructor") {
 		CDerivePtr derive(nullptr);
 
-		CHECK(derive != 10, "derive: ", HEX(derive.Get()));
-		CHECK(10 != derive, "derive: ", HEX(derive.Get()));
-		CHECK(!(derive == 10), "derive: ", HEX(derive.Get()));
-		CHECK(!(10 == derive), "derive: ", HEX(derive.Get()));
+		CHECK(derive != 10, "derive: %p", derive.Get());
+		CHECK(10 != derive, "derive: %p", derive.Get());
+		CHECK(!(derive == 10), "derive: %p", derive.Get());
+		CHECK(!(10 == derive), "derive: %p", derive.Get());
 	}
 
 	TEST_CASE("Empty pointer is not equal to implicit conversion") {
 		CDerivePtr derive(nullptr);
 		CTypeDeriveImplicitConvertPtr i(10);
 
-		CHECK(derive != i, "derive: ", HEX(derive.Get()));
-		CHECK(i != derive, "derive: ", HEX(derive.Get()));
-		CHECK(!(derive == i), "derive: ", HEX(derive.Get()));
-		CHECK(!(i == derive), "derive: ", HEX(derive.Get()));
+		CHECK(derive != i, "derive: %p", derive.Get());
+		CHECK(i != derive, "derive: %p", derive.Get());
+		CHECK(!(derive == i), "derive: %p", derive.Get());
+		CHECK(!(i == derive), "derive: %p", derive.Get());
 	}
 
 	TEST_CASE("Non-empty pointer may equal to constructor") {
 		CDerivePtr derive(10);
 
-		CHECK(derive == 10, "derive: ", DEC(derive->Get()));
-		CHECK(10 == derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive != 10), "derive: ", DEC(derive->Get()));
-		CHECK(!(10 != derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive == 10, "derive: %d", derive->Get());
+		CHECK(10 == derive, "derive: %d", derive->Get());
+		CHECK(!(derive != 10), "derive: %d", derive->Get());
+		CHECK(!(10 != derive), "derive: %d", derive->Get());
 
-		CHECK(derive != 20, "derive: ", DEC(derive->Get()));
-		CHECK(20 != derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive == 20), "derive: ", DEC(derive->Get()));
-		CHECK(!(20 == derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive != 20, "derive: %d", derive->Get());
+		CHECK(20 != derive, "derive: %d", derive->Get());
+		CHECK(!(derive == 20), "derive: %d", derive->Get());
+		CHECK(!(20 == derive), "derive: %d", derive->Get());
 	}
 
 	TEST_CASE("Non-empty pointer may equal to implicit conversion") {
@@ -109,15 +109,15 @@ DEFINE_TEST_GROUP(IsEqualFromConstructor)
 		CTypeDeriveImplicitConvertPtr i(618);
 		CTypeDeriveImplicitConvertPtr j(1111);
 
-		CHECK(derive == i, "derive: ", DEC(derive->Get()));
-		CHECK(i == derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive != i), "derive: ", DEC(derive->Get()));
-		CHECK(!(i != derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive == i, "derive: %d", derive->Get());
+		CHECK(i == derive, "derive: %d", derive->Get());
+		CHECK(!(derive != i), "derive: %d", derive->Get());
+		CHECK(!(i != derive), "derive: %d", derive->Get());
 
-		CHECK(derive != j, "derive: ", DEC(derive->Get()));
-		CHECK(j != derive, "derive: ", DEC(derive->Get()));
-		CHECK(!(derive == j), "derive: ", DEC(derive->Get()));
-		CHECK(!(j == derive), "derive: ", DEC(derive->Get()));
+		CHECK(derive != j, "derive: %d", derive->Get());
+		CHECK(j != derive, "derive: %d", derive->Get());
+		CHECK(!(derive == j), "derive: %d", derive->Get());
+		CHECK(!(j == derive), "derive: %d", derive->Get());
 	}
 }
 

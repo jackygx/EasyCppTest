@@ -17,69 +17,157 @@
 #ifndef __SHARED_PTR_TEST_HPP__
 #define __SHARED_PTR_TEST_HPP__
 
-#define SHOW_TEST_STEP
-
 #include <EasyCpp.hpp>
-#include <TestFramework.hpp>
+#include "../EasyCppTest.hpp"
 
 #include "Base.hpp"
 #include "Derive.hpp"
 
-#define CHECK_ID(base, id) \
-	do { \
-		CHECK((id) == (base)->Identify(), \
-			  "Identify: ", DEC((base)->Identify())); \
-	} while (0)
+template <class T>
+inline void CheckEmpty(T &&t, const char *func, int line)
+{
+	__CHECK(!t, func, line, "%p", t.Get());
+	__CHECK(0 == t.GetRef(), func, line, "Ref: %d", t.GetRef());
+	__CHECK(0 == t.GetWeakRef(), func, line, "WeakRef: %d", t.GetWeakRef());
+}
 
-/* Do not use inline function.
- * Otherwise, when error happens,
- * we cannot know exactly which line cause the error. */
-#define CHECK_EMPTY(t) \
-	CHECK(!t, HEX(t.Get())); \
-	CHECK(0 == t.GetRef(), "Ref: ", DEC(t.GetRef())); \
-	CHECK(0 == t.GetWeakRef(), "WeakRef: ", DEC(t.GetWeakRef()));
+#define CHECK_EMPTY(t) CheckEmpty(t, __func__, __LINE__)
 
+template <class T>
+inline void CheckID(T &&t, ClassIdentify id, const char *func, int line)
+{
+	__CHECK(id == t->Identify(), func, line, "Identify: %d", t->Identify());
+}
+
+#define CHECK_ID(base, id) CheckID(base, id, __func__, __LINE__)
+
+template <class T>
+inline void CheckBaseA(T &&base, ClassIdentify vid,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CHECK(base, func, line, "Base is nullptr");
+	CheckID(base, CI_BASEA, func, line);
+	__CHECK(vid == base->GetBaseAType(), func, line,
+			"GetBaseAType: %d", base->GetBaseAType());
+	__CHECK(ref == base.GetRef(), func, line, "Ref: %d", base.GetRef());
+	__CHECK(wref == base.GetWeakRef(), func, line, "WeakRef: %d", base.GetWeakRef());
+}
 #define CHECK_BASEA(base, vid, ref, wref) \
-	CHECK(base, "Base is nullptr"); \
-	CHECK_ID(base, CI_BASEA); \
-	CHECK(vid == base->GetBaseAType(), "GetBaseAType:: ", DEC(base->GetBaseAType())); \
-	CHECK(ref == base.GetRef(), "Ref: ", DEC(base.GetRef())); \
-	CHECK(wref == base.GetWeakRef(), "WeakRef: ", DEC(base.GetWeakRef()));
+	CheckBaseA(base, vid, ref, wref, __func__, __LINE__)
 
+template <class T>
+inline void __CheckBaseB(T &&base, ClassIdentify vid,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CHECK(base, func, line, "Base is nullptr");
+	CheckID(base, CI_BASEB, func, line);
+	__CHECK(vid == base->GetBaseBType(), func, line,
+			"GetBaseAType: %d", base->GetBaseBType());
+	__CHECK(ref == base.GetRef(), func, line, "Ref: %d", base.GetRef());
+	__CHECK(wref == base.GetWeakRef(), func, line, "WeakRef: %d", base.GetWeakRef());
+}
+
+template <class T,
+		 ENABLE_IF(!IS_CONST(T))>
+inline void CheckBaseB(const CSharedPtr<T> &base, ClassIdentify vid,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CheckBaseB(base, vid, ref, wref, func, line);
+
+	do {
+		auto share1(base->ShareTest());
+		__CheckBaseB(base, vid, ref + 1, wref, func, line);
+		__CheckBaseB(share1, vid, ref + 1, wref, func, line);
+
+		auto share2(base->ConstShareTest());
+		__CheckBaseB(base, vid, ref + 2, wref, func, line);
+		__CheckBaseB(share1, vid, ref + 2, wref, func, line);
+		__CheckBaseB(share2, vid, ref + 2, wref, func, line);
+	} while (0);
+
+	__CheckBaseB(base, vid, ref, wref, func, line);
+}
+
+template <class T,
+		 ENABLE_IF(IS_CONST(T))>
+inline void CheckBaseB(const CSharedPtr<T> &base, ClassIdentify vid,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CheckBaseB(base, vid, ref, wref, func, line);
+
+	do {
+		auto share2(base->ConstShareTest());
+		__CheckBaseB(base, vid, ref + 1, wref, func, line);
+		__CheckBaseB(share2, vid, ref + 1, wref, func, line);
+	} while (0);
+
+	__CheckBaseB(base, vid, ref, wref, func, line);
+}
 #define CHECK_BASEB(base, vid, ref, wref) \
-	CHECK(base, "Base is nullptr"); \
-	CHECK_ID(base, CI_BASEB); \
-	CHECK(vid == base->GetBaseBType(), "GetBaseAType:: ", DEC(base->GetBaseBType())); \
-	CHECK(ref == base.GetRef(), "Ref: ", DEC(base.GetRef())); \
-	CHECK(wref == base.GetWeakRef(), "WeakRef: ", DEC(base.GetWeakRef()));
+	CheckBaseB(base, vid, ref, wref, __func__, __LINE__)
+
+template <class T>
+void inline __CheckDerive(T &&derive,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CHECK(derive, func, line, "derive is nullptr");
+	CheckID(derive, CI_DERIVE, func, line);
+	__CHECK(CI_BASEA_DERIVE == derive->GetBaseAType(), func, line,
+			"GetBaseAType: %d", derive->GetBaseAType());
+	__CHECK(CI_BASEB_DERIVE == derive->GetBaseBType(), func, line,
+			"GetBaseAType: %d", derive->GetBaseBType());
+	__CHECK(ref == derive.GetRef(), func, line, "Ref: %d", derive.GetRef());
+	__CHECK(wref == derive.GetWeakRef(), func, line, "WeakRef: %d", derive.GetWeakRef());
+}
+
+template <class T,
+		 ENABLE_IF(!IS_CONST(T))>
+inline void CheckDerive(const CSharedPtr<T> &derive,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CheckDerive(derive, ref, wref, func, line);
+
+	do {
+		auto share1(derive->ShareTest());
+		__CheckDerive(derive, ref + 1, wref, func, line);
+		__CheckDerive(share1, ref + 1, wref, func, line);
+
+		auto share2(derive->ConstShareTest());
+		__CheckDerive(derive, ref + 2, wref, func, line);
+		__CheckDerive(share2, ref + 2, wref, func, line);
+		__CheckDerive(share2, ref + 2, wref, func, line);
+	} while (0);
+
+	__CheckDerive(derive, ref, wref, func, line);
+}
+
+template <class T,
+		 ENABLE_IF(IS_CONST(T))>
+inline void CheckDerive(const CSharedPtr<T> &derive,
+		uint32_t ref, uint32_t wref, const char *func, int line)
+{
+	__CheckDerive(derive, ref, wref, func, line);
+
+	do {
+		auto share2(derive->ConstShareTest());
+		__CheckDerive(derive, ref + 1, wref, func, line);
+		__CheckDerive(share2, ref + 1, wref, func, line);
+	} while (0);
+
+	__CheckDerive(derive, ref, wref, func, line);
+}
 
 #define CHECK_DERIVE(derive, ref, wref) \
-	CHECK(derive, "derive is nullptr"); \
-	CHECK_ID(derive, CI_DERIVE); \
-	CHECK(CI_BASEA_DERIVE == derive->GetBaseAType(), "GetBaseAType:: ", DEC(derive->GetBaseAType())); \
-	CHECK(CI_BASEB_DERIVE == derive->GetBaseBType(), "GetBaseAType:: ", DEC(derive->GetBaseBType())); \
-	CHECK(ref == derive.GetRef(), "Ref: ", DEC(derive.GetRef())); \
-	CHECK(wref == derive.GetWeakRef(), "WeakRef: ", DEC(derive.GetWeakRef()));
-
-#define CHECK_SAME_PTR(ptr1, ptr2) \
-	do { \
-		CHECK((ptr1).Get() == (ptr2).Get(), \
-				#ptr1": ", HEX((ptr1).Get()), \
-				#ptr2": ", HEX((ptr2).Get())); \
-	} while (0)
+	CheckDerive(derive, ref, wref, __func__, __LINE__)
 
 #define CHECK_DIFFERENT_PTR(ptr1, ptr2) \
 	do { \
-		CHECK((ptr1).Get() != (ptr2).Get(), \
-				#ptr1": ", HEX((ptr1).Get()), \
-				#ptr2": ", HEX((ptr2).Get())); \
+		CHECK((ptr1) != (ptr2), #ptr1 ": %p, " #ptr2 ": %p", ptr1, ptr2); \
 	} while (0)
 
-#define CHECK_SAME(l, r, ToString) \
+#define CHECK_SAME_PTR(ptr1, ptr2) \
 	do { \
-		CHECK((l) == (r), \
-			#l": ", ToString(l), \
-			#r": ", ToString(r)); \
+		CHECK((ptr1) == (ptr2), #ptr1 ": %p, " #ptr2 ": %p", ptr1, ptr2); \
 	} while (0)
 
 void Constructor(void);

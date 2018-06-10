@@ -139,6 +139,16 @@ public:
 		mNum = i;
 	}
 
+	inline decltype(auto) ShareTest(void)
+	{
+		return CEnableSharedPtr<CDerive>::Share();
+	}
+
+	inline decltype(auto) ConstShareTest(void) const
+	{
+		return CEnableSharedPtr<CDerive>::Share();
+	}
+
 	inline enum ClassIdentify Identify(void) const
 	{
 		return CI_DERIVE;

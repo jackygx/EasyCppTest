@@ -20,9 +20,22 @@
 extern void SharedPtrTest(void);
 extern void WeakPtrTest(void);
 
-TEST_CASE_ENTRY()
+int main(int, char *argv[])
 {
-	RUN_TEST(SharedPtrTest);
-	RUN_TEST(WeakPtrTest);
+	/* To show the pretty call stack */
+	InitSymbolPath(argv[0]);
+
+	try {
+		RUN_TEST(SharedPtrTest);
+		RUN_TEST(WeakPtrTest);
+
+	} catch (const IException *e) {
+		e->Show();
+		delete e;
+	} catch (...) {
+		TRACE_ERROR("Unknown error!!!");
+	}
+
+	return 0;
 }
 

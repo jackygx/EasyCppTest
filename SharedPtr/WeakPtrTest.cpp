@@ -24,22 +24,22 @@ DEFINE_TEST_GROUP(WeakPtrForNullptr)
 	TEST_CASE("Lock works for empty pointer") {
 		CBaseAWeakPtr base;
 		CConstBaseAWeakPtr cbase;
-		CHECK(!base.Lock(), "Base lock: ", HEX(base.Lock().Get()));
-		CHECK(!cbase.Lock(), "CBase lock: ", HEX(cbase.Lock().Get()));
+		CHECK(!base.Lock(), "Base lock: %p", base.Lock().Get());
+		CHECK(!cbase.Lock(), "CBase lock: %p", cbase.Lock().Get());
 	}
 
 	TEST_CASE("GetRef works for empty pointer") {
 		CBaseAWeakPtr base;
 		CConstBaseAWeakPtr cbase;
-		CHECK(0 == base.GetRef(), "GetRef: ", DEC(base.GetRef()));
-		CHECK(0 == cbase.GetRef(), "GetRef: ", DEC(cbase.GetRef()));
+		CHECK(0 == base.GetRef(), "GetRef: %d", base.GetRef());
+		CHECK(0 == cbase.GetRef(), "GetRef: %d", cbase.GetRef());
 	}
 
 	TEST_CASE("GetWeakRef works for empty pointer") {
 		CBaseAWeakPtr base;
 		CConstBaseAWeakPtr cbase;
-		CHECK(0 == base.GetWeakRef(), "GetRef: ", DEC(base.GetRef()));
-		CHECK(0 == cbase.GetWeakRef(), "GetRef: ", DEC(cbase.GetRef()));
+		CHECK(0 == base.GetWeakRef(), "GetRef: %d", base.GetRef());
+		CHECK(0 == cbase.GetWeakRef(), "GetRef: %d", cbase.GetRef());
 	}
 	TEST_CASE("Release works for empty pointer") {
 		CBaseAWeakPtr base;
@@ -390,11 +390,9 @@ DEFINE_TEST_GROUP(WeakPtrLock)
 		}
 
 		CHECK(0 == wbase.GetRef(),
-			  "Ref: ",
-			  DEC(wbase.GetRef()));
+			  "Ref: %d", wbase.GetRef());
 		CHECK(1 == wbase.GetWeakRef(),
-			  "WeakRef: ",
-			  DEC(wbase.GetWeakRef()));
+			  "WeakRef: %d", wbase.GetWeakRef());
 
 		CBaseAPtr base(wbase.Lock());
 		CHECK_EMPTY(base);
@@ -414,11 +412,9 @@ DEFINE_TEST_GROUP(WeakPtrLock)
 		}
 
 		CHECK(0 == wbase.GetRef(),
-			  "Ref: ",
-			  DEC(wbase.GetRef()));
+			  "Ref: %d", wbase.GetRef());
 		CHECK(1 == wbase.GetWeakRef(),
-			  "WeakRef: ",
-			  DEC(wbase.GetWeakRef()));
+			  "WeakRef: %d", wbase.GetWeakRef());
 
 		CConstBaseAPtr base(wbase.Lock());
 		CHECK_EMPTY(base);

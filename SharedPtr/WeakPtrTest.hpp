@@ -20,14 +20,14 @@
 #include "SharedPtrTest.hpp"
 
 #define CHECK_WEAK_EMPTY(t) \
-	CHECK(!t.Lock(), "Lock: ", HEX(t.Lock().Get())); \
-	CHECK(0 == t.GetRef(), "Ref: ", DEC(t.GetRef())); \
-	CHECK(0 == t.GetWeakRef(), "WeakRef: ", DEC(t.GetWeakRef()));
+	CHECK(!t.Lock(), "Lock: %p", t.Lock().Get()); \
+	CHECK(0 == t.GetRef(), "Ref: %d", t.GetRef()); \
+	CHECK(0 == t.GetWeakRef(), "WeakRef: %d", t.GetWeakRef());
 
 #define CHECK_WEAK(t, ref, wref) \
 	CHECK(t.Lock(), "Weak reference is empty"); \
-	CHECK(ref == t.GetRef(), "Ref: ", DEC(t.GetRef())); \
-	CHECK(wref == t.GetWeakRef(), "WeakRef: ", DEC(t.GetWeakRef()));
+	CHECK(ref == t.GetRef(), "Ref: %d", t.GetRef()); \
+	CHECK(wref == t.GetWeakRef(), "WeakRef: %d", t.GetWeakRef());
 
 #endif /* __WEAK_PTR_TEST_HPP__ */
 
