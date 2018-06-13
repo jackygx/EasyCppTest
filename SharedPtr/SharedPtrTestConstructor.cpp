@@ -535,18 +535,885 @@ DEFINE_TEST_GROUP(PointerConstructor)
 		CHECK_THROW(CDerivPtr derive(cbase));;
 #endif
 	}
+}
 
-	TEST_CASE("Test customer deleter") {
-		int i = 0;
+static int FuncPointerDeleted = 0;
+static uint64_t FuncPointerPtr = 0;
+
+static void FuncPointerDeleterBaseA(CBaseA *base)
+{
+	FuncPointerDeleted = 1;
+	FuncPointerPtr = (uint64_t)base;
+
+	delete base;
+}
+
+static void FuncPointerDeleterBaseB(CBaseB *base)
+{
+	FuncPointerDeleted = 2;
+	FuncPointerPtr = (uint64_t)base;
+
+	delete base;
+}
+
+static void FuncPointerDeleterDerive(CDerive *derive)
+{
+	FuncPointerDeleted = 3;
+	FuncPointerPtr = (uint64_t)derive;
+
+	delete derive;
+}
+
+static void FuncPointerDeleterConstBaseA(const CBaseA *base)
+{
+	FuncPointerDeleted = 4;
+	FuncPointerPtr = (uint64_t)base;
+
+	delete base;
+}
+
+static void FuncPointerDeleterConstBaseB(const CBaseB *base)
+{
+	FuncPointerDeleted = 5;
+	FuncPointerPtr = (uint64_t)base;
+
+	delete base;
+}
+
+static void FuncPointerDeleterConstDerive(const CDerive *derive)
+{
+	FuncPointerDeleted = 6;
+	FuncPointerPtr = (uint64_t)derive;
+
+	delete derive;
+}
+
+DEFINE_TEST_GROUP(CustomerDeleter)
+{
+	TEST_CASE("Test function pointer for CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CBaseA;
+
 		{
-			CBaseA *base1 = new CBaseA;
-			CBaseAPtr base2(base1, [&](CBaseA *ptr) {
-				i = 1;
-				delete ptr;
-			});
+			CBaseAPtr base2(base, FuncPointerDeleterBaseA);
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
 		}
 
-		CHECK(1 == i, "i: %d", i);
+		CHECK(1 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CBaseB;
+
+		{
+			CBaseBPtr base2(base, FuncPointerDeleterBaseB);
+			CHECK_BASEB(base2, CI_BASEB, 1, 3);
+		}
+
+		CHECK(2 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CDerivePtr derive2(derive, FuncPointerDeleterDerive);
+			CHECK_DERIVE(derive2, 1, 3);
+		}
+
+		CHECK(3 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive => CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CBaseAPtr base(derive, FuncPointerDeleterBaseA);
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(1 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive => CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CBaseBPtr base(derive, FuncPointerDeleterBaseB);
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 3);
+		}
+
+		CHECK(2 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseA => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CDerive;
+
+		{
+			CDerivePtr derive(base, FuncPointerDeleterDerive);
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(3 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseB => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CDerive;
+
+		{
+			CDerivePtr derive(base, FuncPointerDeleterDerive);
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(3 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CBaseA;
+
+		{
+			CConstBaseAPtr base2(base, FuncPointerDeleterConstBaseA);
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
+		}
+
+		CHECK(4 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CBaseB;
+
+		{
+			CConstBaseBPtr base2(base, FuncPointerDeleterConstBaseB);
+			CHECK_BASEB(base2, CI_BASEB, 1, 2);
+		}
+
+		CHECK(5 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstDerivePtr derive2(derive, FuncPointerDeleterConstDerive);
+			CHECK_DERIVE(derive2, 1, 2);
+		}
+
+		CHECK(6 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive => CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstBaseAPtr base(derive, FuncPointerDeleterConstBaseA);
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(4 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CDerive => CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstBaseBPtr base(derive, FuncPointerDeleterConstBaseB);
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 2);
+		}
+
+		CHECK(5 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseA => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CDerive;
+
+		{
+			CConstDerivePtr derive(base, FuncPointerDeleterConstDerive);
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(6 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test function pointer for CBaseB => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CDerive;
+
+		{
+			CConstDerivePtr derive(base, FuncPointerDeleterConstDerive);
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(6 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CBaseA;
+
+		{
+			CBaseAPtr base2(base, [](CBaseA *base) {
+				FuncPointerDeleted = 7;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
+		}
+
+		CHECK(7 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CBaseB;
+
+		{
+			CBaseBPtr base2(base, [](CBaseB *base) {
+				FuncPointerDeleted = 8;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEB(base2, CI_BASEB, 1, 3);
+		}
+
+		CHECK(8 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CDerivePtr derive2(derive, [](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive2, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CBaseAPtr base(derive, [](CBaseA *base) {
+				FuncPointerDeleted = 7;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(7 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+
+		{
+			CBaseBPtr base(derive, [](CBaseB *base) {
+				FuncPointerDeleted = 8;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 3);
+		}
+
+		CHECK(8 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CDerive;
+
+		{
+			CDerivePtr derive(base, [](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CDerive;
+
+		{
+			CDerivePtr derive(base, [](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CBaseA;
+
+		{
+			CConstBaseAPtr base2(base, [](const CBaseA *base) {
+				FuncPointerDeleted = 10;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
+		}
+
+		CHECK(10 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CBaseB;
+
+		{
+			CConstBaseBPtr base2(base, [](const CBaseB *base) {
+				FuncPointerDeleted = 11;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEB(base2, CI_BASEB, 1, 2);
+		}
+
+		CHECK(11 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstDerivePtr derive2(derive, [](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive2, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstBaseAPtr base(derive, [](const CBaseA *base) {
+				FuncPointerDeleted = 10;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(10 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+
+		{
+			CConstBaseBPtr base(derive, [](const CBaseB *base) {
+				FuncPointerDeleted = 11;
+				FuncPointerPtr = (uint64_t)base;
+				delete base;
+			});
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 2);
+		}
+
+		CHECK(11 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CDerive;
+
+		{
+			CConstDerivePtr derive(base, [](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CDerive;
+
+		{
+			CConstDerivePtr derive(base, [](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (has closure) for CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CBaseA;
+		int i = 0;
+
+		{
+			CBaseAPtr base2(base, [&](CBaseA *base) {
+				FuncPointerDeleted = 7;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
+		}
+
+		CHECK(7 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (has closure) for CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CBaseB;
+		int i = 0;
+
+		{
+			CBaseBPtr base2(base, [&](CBaseB *base) {
+				FuncPointerDeleted = 8;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEB(base2, CI_BASEB, 1, 3);
+		}
+
+		CHECK(8 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (has closure) for CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CDerivePtr derive2(derive, [&](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive2, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (has closure) for CDerive => CBaseA (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CBaseAPtr base(derive, [&](CBaseA *base) {
+				FuncPointerDeleted = 7;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(7 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseB (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CBaseBPtr base(derive, [&](CBaseB *base) {
+				FuncPointerDeleted = 8;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 3);
+		}
+
+		CHECK(8 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseA *base = new CDerive;
+		int i = 0;
+
+		{
+			CDerivePtr derive(base, [&](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB => CDerive (non-const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		CBaseB *base = new CDerive;
+		int i = 0;
+
+		{
+			CDerivePtr derive(base, [&](CDerive *derive) {
+				FuncPointerDeleted = 9;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 3);
+		}
+
+		CHECK(9 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CBaseA;
+		int i = 0;
+
+		{
+			CConstBaseAPtr base2(base, [&](const CBaseA *base) {
+				FuncPointerDeleted = 10;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEA(base2, CI_BASEA, 1, 1);
+		}
+
+		CHECK(10 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CBaseB;
+		int i = 0;
+
+		{
+			CConstBaseBPtr base2(base, [&](const CBaseB *base) {
+				FuncPointerDeleted = 11;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEB(base2, CI_BASEB, 1, 2);
+		}
+
+		CHECK(11 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "base: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CConstDerivePtr derive2(derive, [&](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive2, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseA (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CConstBaseAPtr base(derive, [&](const CBaseA *base) {
+				FuncPointerDeleted = 10;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEA(base, CI_BASEA_DERIVE, 1, 1);
+		}
+
+		CHECK(10 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)derive == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CDerive => CBaseB (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CDerive *derive = new CDerive;
+		int i = 0;
+
+		{
+			CConstBaseBPtr base(derive, [&](const CBaseB *base) {
+				FuncPointerDeleted = 11;
+				FuncPointerPtr = (uint64_t)base;
+				i = 1;
+				delete base;
+			});
+			CHECK_BASEB(base, CI_BASEB_DERIVE, 1, 2);
+		}
+
+		CHECK(11 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK(((uint64_t)derive) == (FuncPointerPtr - 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  derive, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseA => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseA *base = new CDerive;
+		int i = 0;
+
+		{
+			CConstDerivePtr derive(base, [&](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK((uint64_t)base == FuncPointerPtr,
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
+	}
+
+	TEST_CASE("Test lambda (no closure) for CBaseB => CDerive (const)") {
+		FuncPointerDeleted = 0;
+		FuncPointerPtr = 0;
+		const CBaseB *base = new CDerive;
+		int i = 0;
+
+		{
+			CConstDerivePtr derive(base, [&](const CDerive *derive) {
+				FuncPointerDeleted = 12;
+				FuncPointerPtr = (uint64_t)derive;
+				i = 1;
+				delete derive;
+			});
+			CHECK_DERIVE(derive, 1, 2);
+		}
+
+		CHECK(12 == FuncPointerDeleted, "FuncPointerDeleted: %d", FuncPointerDeleted);
+		CHECK(1 == i, "i : %d", i);
+		CHECK(((uint64_t)base) == (FuncPointerPtr + 8),
+			  "derive: %p, FuncPointerPtr: 0x%lx",
+			  base, FuncPointerPtr);
 	}
 }
 
@@ -905,6 +1772,7 @@ void Constructor(void)
 	RUN_TEST_GROUP(CopyConstructor);
 	RUN_TEST_GROUP(MoveConstructor);
 	RUN_TEST_GROUP(PointerConstructor);
+	RUN_TEST_GROUP(CustomerDeleter);
 	RUN_TEST_GROUP(MakeShared);
 	RUN_TEST_GROUP(SharedPtrLrefConstructor);
 	RUN_TEST_GROUP(SharedPtrRrefConstructor);
