@@ -26,8 +26,12 @@ int main(int, char *argv[])
 	InitSymbolPath(argv[0]);
 
 	try {
+		CPoolStastics<>::ResetPool();
+
 		RUN_TEST(SharedPtrTest);
 		RUN_TEST(WeakPtrTest);
+
+		CPoolStastics<>::ShowPoolUsage();
 
 	} catch (const IException *e) {
 		e->Show();
