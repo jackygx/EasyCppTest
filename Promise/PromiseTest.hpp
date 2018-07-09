@@ -14,34 +14,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __PROMISE_TEST_HPP__
+#define __PROMISE_TEST_HPP__
+
 #include <EasyCpp.hpp>
-#include "EasyCppTest.hpp"
+#include "../EasyCppTest.hpp"
 
-extern void SharedPtrTest(void);
-extern void WeakPtrTest(void);
-extern void PromiseTest(void);
+void SyncPromise(void);
 
-int main(int, char *argv[])
-{
-	/* To show the pretty call stack */
-	InitSymbolPath(argv[0]);
-
-	try {
-		CPoolStastics<>::ResetPool();
-
-		RUN_TEST(SharedPtrTest);
-		RUN_TEST(WeakPtrTest);
-		RUN_TEST(PromiseTest);
-
-		CPoolStastics<>::ShowPoolUsage();
-
-	} catch (const IException *e) {
-		e->Show();
-		delete e;
-	} catch (...) {
-		TRACE_ERROR("Unknown error!!!");
-	}
-
-	return 0;
-}
+#endif /* __PROMISE_TEST_HPP__ */
 

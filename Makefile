@@ -24,6 +24,8 @@ SRC := \
   SharedPtr/SharedPtrTestOthers.cpp \
   SharedPtr/SharedPtrTest.cpp \
   SharedPtr/WeakPtrTest.cpp \
+  Promise/PromiseTest.cpp \
+  Promise/PromiseTestSyncPromise.cpp \
   Main.cpp
 
 include $(TEMPLATE)

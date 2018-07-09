@@ -85,5 +85,46 @@
 		throw ES("Check throw fail"); \
 	} while (0)
 
+#define __CHECK_INT(cond, func, line, fmt, ...) \
+	do { \
+		if (!(cond)) { \
+			TEST_ERROR(func, line, ">>> " #cond " <<< failed. " fmt, ##__VA_ARGS__); \
+			throw ES("Check fail"); \
+		} \
+	} while (0)
+
+inline void CheckVal(int i, int j, const char *func, int line)
+{
+	bool ret = (i == j);
+
+	if (!ret) {
+		TEST_ERROR(func, line, ">>> %d == %d <<< failed.", i, j );
+		throw ES("Check fail");
+	}
+}
+
+inline void CheckVal(float i, float j, const char *func, int line)
+{
+	float delta = i - j;
+	bool ret = (delta < 0.00001) && (delta > -0.00001);
+
+	if (!ret) {
+		TEST_ERROR(func, line, ">>> %f == %f <<< failed.", i, j );
+		throw ES("Check fail");
+	}
+}
+
+inline void CheckVal(const char *i, const char *j, const char *func, int line)
+{
+	bool ret = (0 == strcmp(i, j));
+
+	if (!ret) {
+		TEST_ERROR(func, line, ">>> (%s) == (%s) <<< failed.", i, j );
+		throw ES("Check fail");
+	}
+}
+
+#define CHECK_VAL(var, val)  CheckVal(var, val, __func__, __LINE__)
+
 #endif /* __EASYCPP_TEST_HPP__ */
 
