@@ -19,21 +19,26 @@
 
 #include <Interface/Interface.hpp>
 
-DEFINE_SYNC_PROMISE(BuildIn, (int, float, const char *), (int));
+DEFINE_SYNC_PROMISE(BuildIn1, (int, float, const char *), (const char *, float, int));
+DEFINE_SYNC_PROMISE(BuildIn2, (int, float, const char *), (int, float, const char *));
 
 #define CHECK_BUILD_IN(_i, _j, _k) \
 	CHECK_VAL(i, _i); \
 	CHECK_VAL(j, _j); \
 	CHECK_VAL(k, _k)
 
-CBuildInPromisePtr GetBuildInSucceedPromise(int i, float j, const char *k)
+CBuildIn1PromisePtr GetBuildIn1Promise(int i, float j, const char *k, bool result)
 {
-	return CBuildInPromisePtr(i, j, k);
+	if (result) {
+		return CBuildIn1PromisePtr(i, j, k);
+	} else {
+		return CBuildIn1PromisePtr(k, j, i);
+	}
 }
 
-CBuildInPromisePtr GetBuildInFailPromise(int i)
+CBuildIn2PromisePtr GetBuildIn2Promise(int i, float j, const char *k, bool result)
 {
-	return CBuildInPromisePtr(i);
+	return CBuildIn2PromisePtr(i, j, k, result);
 }
 
 #if 0

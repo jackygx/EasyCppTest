@@ -22,21 +22,55 @@
 
 DEFINE_TEST_GROUP(BuildInType)
 {
-	TEST_CASE("Test Sync promise with built-in type (succeed).") {
+	TEST_CASE("Succeed and Fail have different type.") {
 		int idx = 0;
-		auto promise = GetBuildInSucceedPromise(10, 20.0f, "test1");
 
-		promise->Then([&](int i, float j, const char *k) {
+		/* 1. we create a SyncPromise */
+		auto promise = GetBuildIn1Promise(10, 20.0f, "test1", true);
+
+		int ret = promise->Then([&](int i, float j, const char *k) {
 			CHECK_BUILD_IN(10, 20.0f, "test1");
 			CHECK_VAL(idx++, 0);
 
-			return 20.0f;
-		})->Catch([&](int) {
+		/* 2. We return a SyncPromise */
+			return GetBuildIn1Promise(30, 40.0f, "test2", true);
+		})->Then([&](int i, float j, const char *k) {
+			CHECK_BUILD_IN(30, 40.0f, "test2");
+			CHECK_VAL(idx++, 1);
+
+		/* 3. We return a different SyncPromise */
+			return GetBuildIn2Promise(50, 60.0f, "test3", true);
+		})->Then([&](int i, float j, const char *k) {
+			CHECK_BUILD_IN(50, 60.0f, "test3");
+			CHECK_VAL(idx++, 2);
+
+			return 100;
+		})->Catch([&](const char *, float, int) {
+			/* Catch promise 1.
+			 * No error, will NOT be called.
+			 * We return nullptr here.
+			 * It should be the same effect to no return. */
+			CHECK(false, "Should not be called");
+
 			return nullptr;
+
+		})->Catch([&](const char *, float, int) {
+			/* Catch promise 2.
+			 * No error, will NOT be called.
+			 * We do not return here.
+			 * It should be the same effect to return nullptr. */
+			CHECK(false, "Should not be called");
+
+		})->Catch([&](int, float, const char *) {
+			/* Catch promise 3.
+			 * No error, will NOT be called.
+			 * We do not return here.
+			 * It should be the same effect to return nullptr. */
+			CHECK(false, "Should not be called");
 		});
 
-//		CHECK_VAL(idx, 3);
-//		CHECK_VAL(ret, 100);
+		CHECK_VAL(idx, 3);
+		CHECK_VAL(ret, 100);
 	}
 
 #if 0
