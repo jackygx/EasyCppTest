@@ -22,7 +22,7 @@
 
 DEFINE_TEST_GROUP(BuildInType)
 {
-	TEST_CASE("Succeed and Fail have different type.") {
+	TEST_CASE("All succeed case with different type.") {
 		int idx = 0;
 
 		/* 1. we create a SyncPromise */
@@ -43,6 +43,12 @@ DEFINE_TEST_GROUP(BuildInType)
 		})->Then([&](int i, float j, const char *k) {
 			CHECK_BUILD_IN(50, 60.0f, "test3");
 			CHECK_VAL(idx++, 2);
+
+		/* 4. Keep returning the SyncPromise */
+			return GetBuildIn2Promise(70, 80.0f, "test4", true);
+		})->Then([&](int i, float j, const char *k) {
+			CHECK_BUILD_IN(70, 80.0f, "test4");
+			CHECK_VAL(idx++, 3);
 
 			return 100;
 		})->Catch([&](const char *, float, int) {
@@ -67,10 +73,52 @@ DEFINE_TEST_GROUP(BuildInType)
 			 * We do not return here.
 			 * It should be the same effect to return nullptr. */
 			CHECK(false, "Should not be called");
+
+		})->Catch([&](int, float, const char *) {
+			/* Catch promise 4.
+			 * No error, will NOT be called.
+			 * We do not return here.
+			 * It should be the same effect to return nullptr. */
+			CHECK(false, "Should not be called");
 		});
 
-		CHECK_VAL(idx, 3);
+		CHECK_VAL(idx, 4);
 		CHECK_VAL(ret, 100);
+	}
+
+	TEST_CASE("Failure case and not recover in Catch.") {
+		int idx = 0;
+
+		/* 1. we create a SyncPromise */
+		auto promise = GetBuildIn1Promise(10, 20.0f, "test1", true);
+
+		promise->Then([&](int i, float j, const char *k) {
+			CHECK_BUILD_IN(10, 20.0f, "test1");
+			CHECK_VAL(idx++, 0);
+
+		/* 2. We return a false SyncPromise */
+			return GetBuildIn1Promise(30, 40.0f, "test2", false);
+
+		})->Catch([&](const char *, float, int) {
+		/* Catch promise 1. No error, will NOT be called. */
+			CHECK(false, "Should not be called");
+
+		})->Catch([&](const char *i, float j, int k) {
+		/* Catch promise 1. Will be called. */
+			CHECK_BUILD_IN("test2", 40.0f, 30);
+			CHECK_VAL(idx++, 1);
+
+			/* Do not recover from the error.
+			 * This time we return nullptr */
+			return nullptr;
+
+		})->Then([&](int, float, const char *) {
+			/* Then method will not be called for promise 2. */
+			CHECK(false, "Should not be called");
+
+		});
+
+		CHECK_VAL(idx, 2);
 	}
 
 #if 0

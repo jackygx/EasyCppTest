@@ -33,7 +33,7 @@ int main(int, char *argv[])
 		RUN_TEST(WeakPtrTest);
 		RUN_TEST(PromiseTest);
 
-		CPoolStastics<>::ShowPoolUsage();
+//		CPoolStastics<>::ShowPoolUsage();
 
 	} catch (const IException *e) {
 		e->Show();
