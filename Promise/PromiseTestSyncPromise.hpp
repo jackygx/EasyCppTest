@@ -27,7 +27,7 @@ DEFINE_SYNC_PROMISE(BuildIn2, (int, float, const char *), (int, float, const cha
 	CHECK_VAL(j, _j); \
 	CHECK_VAL(k, _k)
 
-CBuildIn1PromisePtr GetBuildIn1Promise(int i, float j, const char *k, bool result)
+inline CBuildIn1PromisePtr GetBuildIn1Promise(int i, float j, const char *k, bool result)
 {
 	if (result) {
 		return CBuildIn1PromisePtr(i, j, k);
@@ -36,9 +36,14 @@ CBuildIn1PromisePtr GetBuildIn1Promise(int i, float j, const char *k, bool resul
 	}
 }
 
-CBuildIn2PromisePtr GetBuildIn2Promise(int i, float j, const char *k, bool result)
+inline CBuildIn2PromisePtr GetBuildIn2Promise(int i, float j, const char *k, bool result)
 {
 	return CBuildIn2PromisePtr(i, j, k, result);
+}
+
+inline decltype(auto) GetBuildIn3Promise(int i, float j, const char *k)
+{
+	return CreateSyncPromise(i, j, k);
 }
 
 #if 0
