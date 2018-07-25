@@ -19,70 +19,6 @@
 
 #include <Interface/Interface.hpp>
 
-DEFINE_SYNC_PROMISE(BuildIn1, (int, float, const char *), (const char *, float, int));
-DEFINE_SYNC_PROMISE(BuildIn2, (int, float, const char *), (int, float, const char *));
-
-#define CHECK_BUILD_IN(_i, _j, _k) \
-	CHECK_VAL(i, _i); \
-	CHECK_VAL(j, _j); \
-	CHECK_VAL(k, _k)
-
-inline CBuildIn1PromisePtr GetBuildIn1Promise(int i, float j, const char *k, bool result)
-{
-	if (result) {
-		return CBuildIn1PromisePtr(i, j, k);
-	} else {
-		return CBuildIn1PromisePtr(k, j, i);
-	}
-}
-
-inline CBuildIn2PromisePtr GetBuildIn2Promise(int i, float j, const char *k, bool result)
-{
-	return CBuildIn2PromisePtr(i, j, k, result);
-}
-
-inline decltype(auto) GetBuildIn3Promise(int i, float j, const char *k)
-{
-	return CreateSyncPromise(i, j, k);
-}
-
-#if 0
-struct SyncPromiseStruct1 {
-	int i;
-	float j;
-	const char *k;
-};
-
-struct SyncPromiseStruct2 {
-	const char *i;
-	float j;
-	int k;
-};
-
-DEFINE_SYNC_PROMISE(Structure,
-					(struct SyncPromiseStruct1, struct SyncPromiseStruct2));
-
-CStructurePromisePtr GetStructPromise(bool result)
-{
-	struct SyncPromiseStruct1 promise1 = {
-		.i = 10,
-		.j = 20.0f,
-		.k = "test1",
-	};
-
-	struct SyncPromiseStruct2 promise2 = {
-		.i = "test2",
-		.j = 40.0f,
-		.k = 30,
-	};
-
-	if (result) {
-		return CStructurePromisePtr(promise1, promise2);
-	} else {
-		return CStructurePromisePtr();
-	}
-}
-
 DEFINE_CLASS(SyncPromise1);
 DEFINE_CLASS(SyncPromise2);
 
@@ -150,22 +86,41 @@ private:
 	int mK;
 };
 
-DEFINE_SYNC_PROMISE(SharedPtr,
-					CSyncPromise1Ptr,
-					CSyncPromise2Ptr);
+DEFINE_SYNC_PROMISE(SyncPromise1,
+					(int, float, const char *, CSyncPromise1Ptr),
+					(const char *, float, int, CSyncPromise2Ptr));
+DEFINE_SYNC_PROMISE(SyncPromise2,
+					(int, float, const char *, CSyncPromise1Ptr),
+					(int, float, const char *, CSyncPromise1Ptr));
 
-CSharedPtrPromisePtr GetSharedPtrPromise(bool result)
+#define CHECK_BUILD_IN(_i, _j, _k) \
+	CHECK_VAL(i, _i); \
+	CHECK_VAL(j, _j); \
+	CHECK_VAL(k, _k)
+
+#define CHECK_CLASS(c, _i, _j, _k) \
+	CHECK_VAL(c->GetI(), _i); \
+	CHECK_VAL(c->GetJ(), _j); \
+	CHECK_VAL(c->GetK(), _k);
+
+inline CSyncPromise1PromisePtr GetSyncPromise1Promise(int i, float j, const char *k, bool result)
 {
-	CSyncPromise1Ptr promise1(10, 20.0f, "test1");
-	CSyncPromise2Ptr promise2("test2", 30.0f, 40);
-
 	if (result) {
-		return CSharedPtrPromisePtr(promise1, promise2);
+		return CSyncPromise1PromisePtr(i, j, k, CSyncPromise1Ptr(i, j, k));
 	} else {
-		return CSharedPtrPromisePtr();
+		return CSyncPromise1PromisePtr(k, j, i, CSyncPromise2Ptr(k, j, i));
 	}
 }
-#endif
+
+inline CSyncPromise2PromisePtr GetSyncPromise2Promise(int i, float j, const char *k, bool result)
+{
+	return CSyncPromise2PromisePtr(i, j, k, CSyncPromise1Ptr(i, j, k), result);
+}
+
+inline decltype(auto) GetSyncPromise3Promise(int i, float j, const char *k)
+{
+	return CreateSyncPromise(CSyncPromise2Ptr(k, j, i), i, j, k);
+}
 
 #endif /* __PROMISE_TEST_SYNC_PROMISE_HPP__ */
 
