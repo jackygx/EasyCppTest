@@ -114,7 +114,8 @@ inline CSyncPromise1PromisePtr GetSyncPromise1Promise(int i, float j, const char
 
 inline CSyncPromise2PromisePtr GetSyncPromise2Promise(int i, float j, const char *k, bool result)
 {
-	return CSyncPromise2PromisePtr(i, j, k, CSyncPromise1Ptr(i, j, k), result);
+	return CSyncPromise2PromisePtr(i, j, k, CSyncPromise1Ptr(i, j, k), result ?
+			CPromiseBase::SUCCEED : CPromiseBase::FAIL);
 }
 
 inline decltype(auto) GetSyncPromise3Promise(int i, float j, const char *k)
