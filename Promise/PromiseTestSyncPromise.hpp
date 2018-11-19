@@ -19,6 +19,23 @@
 
 #include <Interface/Interface.hpp>
 
+DEFINE_SYNC_PROMISE(VoidVoidSync, (void), (void));
+
+class CSyncPromiseVoidVoid
+{
+public:
+	static inline CVoidVoidSyncPromisePtr Create(bool result)
+	{
+		if (result) {
+			return CVoidVoidSyncPromisePtr(CPromiseBase::SUCCEED);
+
+		} else {
+			return CVoidVoidSyncPromisePtr(CPromiseBase::FAIL);
+
+		}
+	}
+};
+
 DEFINE_CLASS(SyncPromise1);
 DEFINE_CLASS(SyncPromise2);
 
@@ -118,10 +135,12 @@ inline CSyncPromise2PromisePtr GetSyncPromise2Promise(int i, float j, const char
 			CPromiseBase::SUCCEED : CPromiseBase::FAIL);
 }
 
+#if 0
 inline decltype(auto) GetSyncPromise3Promise(int i, float j, const char *k)
 {
 	return CreateSyncPromise(CSyncPromise2Ptr(k, j, i), i, j, k);
 }
+#endif
 
 #endif /* __PROMISE_TEST_SYNC_PROMISE_HPP__ */
 
