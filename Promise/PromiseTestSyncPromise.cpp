@@ -23,19 +23,19 @@
 
 DEFINE_TEST_GROUP(SyncPromiseTestVoidVoid)
 {
-	typedef CSharedPtr<CSyncPromiseThenParams<void>> ThenType;
-	typedef CSharedPtr<CSyncPromiseCatchParams<void>> CatchType;
+	typedef CSharedPtr<CSyncPromiseThenParams<void>> VoidThen;
+	typedef CSharedPtr<CSyncPromiseCatchParams<void>> VoidCatch;
 
 	TEST_CASE("Test Then") {
 		int idx = 0;
 
 		CSyncPromiseVoidVoid::Create(true)
-		->CHECK_TYPE(ThenType, CatchType, CPromiseBase::SUCCEED)
+		->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::SUCCEED)
 
 		/* Then - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK_VAL(idx++, 0);
-		})->CHECK_TYPE(CatchType, CPromiseBase::IGNORE)
+		})->CHECK_TYPE(VoidCatch, CPromiseBase::IGNORE)
 		
 		/* Ignore - CPromisePtr<Catch<void>> */
 		->Catch([&](void) {
@@ -49,12 +49,12 @@ DEFINE_TEST_GROUP(SyncPromiseTestVoidVoid)
 		int idx = 0;
 
 		CSyncPromiseVoidVoid::Create(false)
-		->CHECK_TYPE(ThenType, CatchType, CPromiseBase::FAIL)
+		->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::FAIL)
 
 		/* Catch - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK(false, "Should not be called");
-		})->CHECK_TYPE(CatchType, CPromiseBase::FAIL)
+		})->CHECK_TYPE(VoidCatch, CPromiseBase::FAIL)
 
 		/* Catch CPromisePtr<Catch<void>> */
 		->Catch([&](void) {
@@ -65,43 +65,47 @@ DEFINE_TEST_GROUP(SyncPromiseTestVoidVoid)
 		CHECK_VAL(idx, 1);
 	}
 
-	typedef CSharedPtr<CSyncPromise<ThenType, CatchType>> VoidVoidPromise;
-	typedef CSharedPtr<CSyncPromiseThenParams<VoidVoidPromise>> VoidVoidThen;
+	typedef CSharedPtr<CSyncPromiseThenParams<
+				CSharedPtr<CSyncPromise<
+					VoidThen,
+					VoidCatch
+				>>
+			>> Void1Then;
 
 	TEST_CASE("Test Catch (return void)") {
 		int idx = 0;
 
 		CSyncPromiseVoidVoid::Create(true)
-		->CHECK_TYPE(ThenType, CatchType, CPromiseBase::SUCCEED)
+		->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::SUCCEED)
 
 		/* Then - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK_VAL(idx++, 0);
 			return CSyncPromiseVoidVoid::Create(false);
-		})->CHECK_TYPE(VoidVoidThen, CatchType, CPromiseBase::SUCCEED)
+		})->CHECK_TYPE(Void1Then, VoidCatch, CPromiseBase::SUCCEED)
 
 		/* Then - CPromisePtr<Catch - CPromisePtr<Then<void>, Catch<void>>, Catch<void>> */
 		->Catch([&](void) {
 			CHECK(false, "Should not be called");
-		})->CHECK_TYPE(ThenType, CatchType, CPromiseBase::FAIL)
+		})->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::FAIL)
 
 		/* Catch - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK(false, "Should not be called");
 			return CSyncPromiseVoidVoid::Create(false);
-		})->CHECK_TYPE(VoidVoidThen, CatchType, CPromiseBase::FAIL)
+		})->CHECK_TYPE(Void1Then, VoidCatch, CPromiseBase::FAIL)
 
 		/* Catch - CPromisePtr<Catch - CPromisePtr<Then<void>, Catch<void>>, Catch<void>> */
 		->Catch([&](void) {
 			CHECK_VAL(idx++, 1);
 			/* Do not recover from the error.
 			 * This time we do not return */
-		})->CHECK_TYPE(ThenType, CatchType, CPromiseBase::IGNORE)
+		})->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::IGNORE)
 
 		/* Ignore - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK(false, "Should not be called");
-		})->CHECK_TYPE(CatchType, CPromiseBase::IGNORE)
+		})->CHECK_TYPE(VoidCatch, CPromiseBase::IGNORE)
 
 		/* Ignore - CPromisePtr<Catch<void>> */
 		->Catch([&](void) {
@@ -111,66 +115,54 @@ DEFINE_TEST_GROUP(SyncPromiseTestVoidVoid)
 		CHECK_VAL(idx, 2);
 	}
 
-#if 0
+	typedef CSharedPtr<CSyncPromiseThenParams<
+				CSharedPtr<CSyncPromiseBase<
+					CSharedPtr<CSyncPromiseThenParams<
+						CSharedPtr<CSyncPromise<
+							VoidThen,
+							VoidCatch
+						>>
+					>>,
+					VoidCatch
+				>>
+			>> Void2Then;
+
+	typedef CSharedPtr<CSyncPromiseThenParams<
+				CSharedPtr<CSyncPromiseBase<
+					CSharedPtr<CSyncPromiseThenParams<
+						CSharedPtr<CSyncPromiseBase<
+							VoidCatch
+						>>
+					>>,
+					VoidCatch
+				>>
+			>> Void3Then;
+
 	TEST_CASE("Test Catch (return void) - different order") {
 		int idx = 0;
 
-		/* 1. CVoidVoidSyncPromise */
 		CSyncPromiseVoidVoid::Create(true)
-		/* 1. Take then.
-		 * CPromisePtr<Then<void>, Catch<void>>(SUCCEED) */
+		->CHECK_TYPE(VoidThen, VoidCatch, CPromiseBase::SUCCEED)
+
+		/* Then - CPromisePtr<Then<void>, Catch<void>> */
 		->Then([&](void) {
 			CHECK_VAL(idx++, 0);
-
-		/* 2. SyncPromise */
 			return CSyncPromiseVoidVoid::Create(false);
+		})->CHECK_TYPE(Void1Then, VoidCatch, CPromiseBase::SUCCEED)
 
-		/* 2. Not take then
-		 * CPromisePtr<
-		 *   CPromisePtr<
-		 *     Then<void>, Catch<void>>(FAIL),
-		 *   Catch<void>>(SUCCEED) */
-		})->Then([&](void) {
+		/* Then - CPromisePtr<Catch - CPromisePtr<Then<void>, Catch<void>>, Catch<void>> */
+		->Then([&](void) {
 			CHECK(false, "Should not be called");
-
-		/* 3. SyncPromise (false) */
 			return CSyncPromiseVoidVoid::Create(false);
+		})->CHECK_TYPE(Void2Then, VoidCatch, CPromiseBase::SUCCEED)
 
-		/* 3. Ignore then
-		 * CPromisePtr<
-		 *   CPromisePtr<
-		 *     CPromisePtr<
-		 *       Then<void>, Catch<void>>(FAIL),
-		 *     Catch<void>>(FAIL),
-		 *   Catch<void>>(SUCCEED) */
-		})->Then([&](void) {
+		/* Then - CPromisePtr<Catch - CPromisePtr<Catch - CPromisePtr<Then<void>, Catch<void>>, Catch<void>>, Catch<void>> */
+		->Then([&](void) {
 			CHECK(false, "Should not be called");
+		})->CHECK_TYPE(Void3Then, VoidCatch, CPromiseBase::SUCCEED);
 
-		/* 1. Not take catch
-		 * CPromisePtr<
-		 *   CPromisePtr<
-		 *     Then<void>, Catch<void>>(FAIL),
-		 *   Catch<void>>(FAIL)> */
-		})->Catch([&](void) {
-			CHECK(false, "Should not be called");
-
-		/* 2. Take catch
-		 * CPromisePtr<Then<void>, Catch<void>>(FAIL)> */
-		})->Catch([&](void) {
-			CHECK_VAL(idx++, 1);
-
-			/* Do not recover from the error.
-			 * This time we do not return */
-
-		/* 3. Ignore catch
-		 * CPromisePtr<Then<void>>(FAIL)> */
-		})->Catch([&](void) {
-			CHECK(false, "Should not be called");
-		});
-
-		CHECK_VAL(idx, 2);
+		/* Then - CPromisePtr<Catch - CPromisePtr<Catch - CPromisePtr<Catch - CPromisePtr<Catch<void>>, Catch<void>>, Catch<void>>, Catch<void>> */
 	}
-#endif
 
 	TEST_CASE("Test Catch (recover)") {
 		int idx = 0;
